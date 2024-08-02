@@ -1,0 +1,31 @@
+{
+  "name": "mahi-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run compile && nodemon ./dist/index.js",
+    "compile": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate:local": "dotenv -e .env.local -- npx prisma migrate dev",
+    "migrate:prd": "dotenv -e .env -- npx prisma migrate deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@apollo/server": "^4.10.5",
+    "@prisma/client": "^5.17.0",
+    "dotenv": "^16.4.5",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.5.1",
+    "node-fetch": "^2.6.1",
+    "prisma": "^5.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "nodemon": "^3.1.4",
+    "typescript": "^5.5.4"
+  }
+}
