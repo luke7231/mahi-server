@@ -12,6 +12,9 @@ interface MyContext {
   token?: string;
 }
 
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
 // Required logic for integrating with Express
 const app = express();
 // Our httpServer handles incoming requests to our Express app.
