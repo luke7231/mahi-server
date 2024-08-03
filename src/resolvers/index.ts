@@ -1,12 +1,10 @@
-import { books } from "../data/data.js";
-import { createStore, stores } from "./stores.js";
+import { storeResolvers } from "./storeResolvers.js";
 
 export const resolvers = {
   Query: {
-    books: () => books,
-    stores,
+    ...storeResolvers.Query,
   },
   Mutation: {
-    createStore,
+    ...storeResolvers.Mutation,
   },
 };

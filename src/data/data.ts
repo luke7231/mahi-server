@@ -5,17 +5,6 @@ export interface IData {
   lat: number;
 }
 
-export const books = [
-  {
-    title: "The Awakening",
-    author: "Kate Chopin",
-  },
-  {
-    title: "City of Glass",
-    author: "Paul Auster",
-  },
-];
-
 export const DATA: IData[] = [
   {
     id: 1,

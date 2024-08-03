@@ -5,7 +5,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import express from "express";
 import http from "http";
 import cors from "cors";
-import { typeDefs } from "./typeDefs/index.js";
+import { typeDefs } from "./graphql/index.js";
 import { resolvers } from "./resolvers/index.js";
 import { PrismaClient } from "@prisma/client";
 

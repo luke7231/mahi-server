@@ -7,9 +7,9 @@ export const typeDefs = `
   }
 
   type Query {
-    stores(id: Int!): [Store]
+    storeList(id: Int!): [Store]
   }
-  
+
   type Mutation {
     createStore(lat: Float, lng: Float, title: String!): CreateStoreResponse
   }
