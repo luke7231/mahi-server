@@ -7,12 +7,11 @@ import http from "http";
 import cors from "cors";
 import { typeDefs } from "./typeDefs/index.js";
 import { resolvers } from "./resolvers/index.js";
+import { PrismaClient } from "@prisma/client";
 
 interface MyContext {
   token?: string;
 }
-
-import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();
 // Required logic for integrating with Express
