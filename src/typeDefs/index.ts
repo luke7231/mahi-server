@@ -1,9 +1,4 @@
 export const typeDefs = `
-  type Book {
-    title: String
-    author: String
-  }
-
   type Store {
     id: Int!
     lat: Float
@@ -12,7 +7,6 @@ export const typeDefs = `
   }
 
   type Query {
-    books: [Book]
     stores(id: Int!): [Store]
   }
   
