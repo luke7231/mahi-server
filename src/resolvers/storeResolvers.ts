@@ -6,7 +6,7 @@ export const storeResolvers = {
       console.log(id, "hello");
       const stores = await prisma.store.findMany();
       console.log(stores);
-      return stores; // Assuming DATA is a placeholder, returning actual stores from the database.
+      return stores;
     },
   },
   Mutation: {
@@ -19,7 +19,6 @@ export const storeResolvers = {
             title,
           },
         });
-        console.log(newStore);
 
         return {
           ok: true,
