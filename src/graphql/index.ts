@@ -4,6 +4,9 @@ export const typeDefs = `
     lat: Float
     lng: Float
     title: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    likes: [Like!]
   }
 
   type Query {
@@ -59,7 +62,18 @@ export const typeDefs = `
     gender: String
     address: String
   }
-
+  
+  type Like {
+    id: Int!
+    userId: Int!
+    storeId: Int!
+    createdAt: DateTime!
+    user: User
+    store: Store
+  }
+  type Mutation {
+    likeStore(userId: Int!, storeId: Int!): Like!
+  }
 
   scalar DateTime
 `;

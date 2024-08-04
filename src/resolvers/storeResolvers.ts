@@ -33,4 +33,12 @@ export const storeResolvers = {
       }
     },
   },
+  Store: {
+    likes: async (parent) => {
+      const likes = await prisma.like.findMany({
+        where: { storeId: parent.id },
+      });
+      return likes;
+    },
+  },
 };
