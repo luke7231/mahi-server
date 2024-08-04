@@ -18,4 +18,48 @@ export const typeDefs = `
     ok: Boolean!
     error: String
   }
+
+  type User {
+    id: Int!
+    name: String!
+    email: String!
+    password: String!
+    phone: String
+    dateOfBirth: DateTime
+    gender: String
+    address: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    likes: [Like!]
+  }
+
+  type Query {
+    users: [User!]!
+    user(id: Int!): User!
+  }
+  type Mutation {
+    createUser(data: CreateUserInput!): User!
+    updateUser(id: Int!, data: UpdateUserInput!): User!
+  }
+  input CreateUserInput {
+    name: String!
+    email: String!
+    password: String!
+    phone: String
+    dateOfBirth: DateTime
+    gender: String
+    address: String
+  }
+  input UpdateUserInput {
+    name: String
+    email: String
+    password: String
+    phone: String
+    dateOfBirth: DateTime
+    gender: String
+    address: String
+  }
+
+
+  scalar DateTime
 `;
