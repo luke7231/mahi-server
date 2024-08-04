@@ -16,6 +16,7 @@ model Store {
   updatedAt DateTime @updatedAt @default(now())
   address   String?
   owner     String?
+  likes     Like[]
 }
 model User {
   id           Int      @id @default(autoincrement())
@@ -28,4 +29,16 @@ model User {
   address      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
+  likes        Like[]
+}
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  storeId   Int
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  store     Store    @relation(fields: [storeId], references: [id])
+
+  @@unique([userId, storeId])
 }
