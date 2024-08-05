@@ -53,7 +53,12 @@ export const storeResolvers = {
         where: { userId },
         include: { store: true },
       });
-      return likes.map((like) => like.store);
+      return likes.map((like) => {
+        return {
+          ...like.store,
+          isLiked: true,
+        };
+      });
     },
   },
   Mutation: {
