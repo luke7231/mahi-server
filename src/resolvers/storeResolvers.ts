@@ -29,6 +29,13 @@ export const storeResolvers = {
   `;
       return storesWithDistance;
     },
+    likedStores: async (_, { userId }) => {
+      const likes = await prisma.like.findMany({
+        where: { userId },
+        include: { store: true },
+      });
+      return likes.map((like) => like.store);
+    },
   },
   Mutation: {
     createStore: async (_, { lat, lng, title }) => {
