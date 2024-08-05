@@ -7,10 +7,11 @@ export const typeDefs = `
     createdAt: DateTime!
     updatedAt: DateTime!
     likes: [Like!]
+    isLiked: Boolean
   }
 
   type Query {
-    stores(lat: Float, lng: Float): [Store]
+    stores(lat: Float, lng: Float, userId: Int): [Store]
     likedStores(userId: Int!): [Store!]
   }
 

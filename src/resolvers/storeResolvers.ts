@@ -1,9 +1,13 @@
+import { Store } from "@prisma/client";
 import { prisma } from "../index.js";
 
 export const storeResolvers = {
   Query: {
     //고도화
-    stores: async (_, { lat, lng }: { lat?: number; lng?: number }) => {
+    stores: async (
+      _,
+      { lat, lng, userId }: { lat?: number; lng?: number; userId?: number } // TODO: token에서 뽑기?
+    ) => {
       const latitude = lat || 37.4552003863507; // 가천대
       const longitude = lng || 127.13370255097; // 가천대
 
@@ -27,7 +31,22 @@ export const storeResolvers = {
     FROM store
     ORDER BY distance ASC;
   `;
-      return storesWithDistance;
+
+      if (!userId) return storesWithDistance;
+      const likes = await prisma.like.findMany({
+        where: { userId },
+      });
+      const likeIds = likes.map((like) => like.storeId);
+      const set = new Set(likeIds);
+
+      let newArray = (storesWithDistance as Array<Store>).map((item) => {
+        // user.id가 bSet에 포함되어 있으면 user.isLiked를 true로 설정
+        return {
+          ...item,
+          isLiked: set.has(item.id),
+        };
+      });
+      return newArray;
     },
     likedStores: async (_, { userId }) => {
       const likes = await prisma.like.findMany({
