@@ -4,8 +4,8 @@ export const storeResolvers = {
   Query: {
     //고도화
     stores: async (_, { lat, lng }: { lat?: number; lng?: number }) => {
-      const latitude = lat || 37.4552003863507;
-      const longitude = lng || 127.13370255097;
+      const latitude = lat || 37.4552003863507; // 가천대
+      const longitude = lng || 127.13370255097; // 가천대
 
       // [거리순 LOGIC]
       // TODO: 필터에 따라 다르게 가야함. (가격순, 거리순, 추천순 등등)
