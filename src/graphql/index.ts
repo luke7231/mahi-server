@@ -10,7 +10,7 @@ export const typeDefs = `
   }
 
   type Query {
-    stores: [Store]
+    stores(lat: Float, lng: Float): [Store]
   }
 
   type Mutation {
