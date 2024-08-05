@@ -35,5 +35,36 @@ export const likeResolvers = {
       });
       return newLike;
     },
+    cancelLike: async (
+      _,
+      { userId, storeId }: { userId: number; storeId: number }
+    ) => {
+      const like = await prisma.like.findUnique({
+        where: {
+          userId_storeId: {
+            userId,
+            storeId,
+          },
+        },
+      });
+
+      if (!like) {
+        throw new Error("Like not found");
+      }
+
+      const deletedLike = await prisma.like.delete({
+        where: {
+          userId_storeId: {
+            userId,
+            storeId,
+          },
+        },
+        include: {
+          user: true,
+          store: true,
+        },
+      });
+      return deletedLike;
+    },
   },
 };

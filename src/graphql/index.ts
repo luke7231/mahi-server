@@ -75,6 +75,7 @@ export const typeDefs = `
   }
   type Mutation {
     likeStore(userId: Int!, storeId: Int!): Like!
+    cancelLike(userId: Int!, storeId: Int!): Like!
   }
 
   scalar DateTime
