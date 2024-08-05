@@ -10,7 +10,7 @@ export const typeDefs = `
   }
 
   type Query {
-    storeList(id: Int!): [Store]
+    stores: [Store]
   }
 
   type Mutation {

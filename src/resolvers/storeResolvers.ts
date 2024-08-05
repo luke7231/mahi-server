@@ -2,9 +2,9 @@ import { prisma } from "../index.js";
 
 export const storeResolvers = {
   Query: {
-    storeList: async (_) => {
+    //고도화
+    stores: async (_) => {
       const stores = await prisma.store.findMany();
-      console.log(stores);
       return stores;
     },
   },
