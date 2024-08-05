@@ -2,8 +2,7 @@ import { prisma } from "../index.js";
 
 export const storeResolvers = {
   Query: {
-    storeList: async (_, { id }) => {
-      console.log(id, "hello");
+    storeList: async (_) => {
       const stores = await prisma.store.findMany();
       console.log(stores);
       return stores;
