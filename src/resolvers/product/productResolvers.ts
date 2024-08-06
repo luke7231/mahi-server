@@ -11,21 +11,16 @@ export const productResolvers = {
       await prisma.product.findUnique({ where: { id } }),
   },
   Mutation: {
-    createProduct: async (
+    createProduct: async (_, { input }) => {
+      return await prisma.product.create({
+        data: input,
+      });
+    },
+    updateProduct: async (
       _,
       {
-        storeId,
-        name,
-        price,
-        discountPrice,
-        quantity,
-        description,
-        saleEndTime,
-      }
-    ) => {
-      return await prisma.product.create({
-        data: {
-          storeId,
+        input: {
+          id,
           name,
           price,
           discountPrice,
@@ -33,11 +28,7 @@ export const productResolvers = {
           description,
           saleEndTime,
         },
-      });
-    },
-    updateProduct: async (
-      _,
-      { id, name, price, discountPrice, quantity, description, saleEndTime }
+      }
     ) => {
       return await prisma.product.update({
         where: { id },
