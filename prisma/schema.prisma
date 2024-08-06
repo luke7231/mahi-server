@@ -48,4 +48,5 @@ model Like {
 
 model Expo_Token {
   token String @unique
+  createdAt   DateTime  @default(now())
 }
