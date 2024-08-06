@@ -8,6 +8,7 @@ export const typeDefs = `
     updatedAt: DateTime!
     likes: [Like!]
     isLiked: Boolean
+    products: [Product!]
   }
 
   type Query {
@@ -23,6 +24,52 @@ export const typeDefs = `
     ok: Boolean!
     error: String
   }
+
+    
+  type Product {
+    id: Int!
+    store: Store!
+    name: String!
+    price: Float!
+    discountPrice: Float
+    quantity: Int!
+    description: String
+    saleEndTime: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  type Query {
+    products(storeId: Int!): [Product!]!
+    product(id: Int!): Product
+  }
+
+  type Mutation {
+    createProduct(input: CreateProductInput!): Product!
+    updateProduct(input: UpdateProductInput!): Product!
+    deleteProduct(id: Int!): Product!
+  }
+  input CreateProductInput {
+    storeId: Int!
+    name: String!
+    price: Float!
+    discountPrice: Float
+    quantity: Int!
+    description: String
+    saleEndTime: DateTime
+  }
+
+  input UpdateProductInput {
+    id: Int!
+    name: String
+    price: Float
+    discountPrice: Float
+    quantity: Int
+    description: String
+    saleEndTime: DateTime
+  }
+
+
 
   type User {
     id: Int!
