@@ -36,6 +36,7 @@ export const typeDefs = `
     createdAt: DateTime!
     updatedAt: DateTime!
     likes: [Like!]
+    push_token: String
   }
 
   type Query {
@@ -54,6 +55,7 @@ export const typeDefs = `
     dateOfBirth: DateTime
     gender: String
     address: String
+    push_token: String
   }
   input UpdateUserInput {
     name: String
@@ -63,6 +65,7 @@ export const typeDefs = `
     dateOfBirth: DateTime
     gender: String
     address: String
+    push_token: String
   }
   
   type Like {
