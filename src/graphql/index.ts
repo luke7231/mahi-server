@@ -79,4 +79,15 @@ export const typeDefs = `
   }
 
   scalar DateTime
+
+  type Token {
+    token: String!
+    createdAt: DateTime!
+  }
+  type Mutation {
+    createToken(data: CreateTokenInput!): Token!
+  }
+  input CreateTokenInput {
+    token: String!
+  }
 `;
