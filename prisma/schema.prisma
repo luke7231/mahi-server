@@ -17,6 +17,21 @@ model Store {
   address   String?
   owner     String?
   likes     Like[]
+   products  Product[] // Store와 Product의 관계 설정
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  store         Store    @relation(fields: [storeId], references: [id])
+  storeId       Int
+  name          String
+  price         Float
+  discountPrice Float?
+  quantity      Int
+  description   String?
+  saleEndTime   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt @default(now())
 }
 
 model User {
