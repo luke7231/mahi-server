@@ -2,6 +2,7 @@ import { Store } from "@prisma/client";
 import { prisma } from "../../index.js";
 
 import { Expo } from "expo-server-sdk";
+import { sendPushNotification } from "../../lib/expo-token.js";
 
 export const productResolvers = {
   Query: {
@@ -11,10 +12,34 @@ export const productResolvers = {
       await prisma.product.findUnique({ where: { id } }),
   },
   Mutation: {
+    // 푸시알람 가즈아
     createProduct: async (_, { input }) => {
-      return await prisma.product.create({
+      const newProduct = await prisma.product.create({
         data: input,
       });
+
+      if (newProduct) {
+        const store = await prisma.store.findUnique({
+          where: { id: input.storeId },
+        });
+        const likedUsers = await prisma.like.findMany({
+          where: { storeId: input.storeId },
+          include: { user: true },
+        });
+
+        // 좋아요한 유저들의 이름만 담은 배열
+        const likedUserTokens = likedUsers.map((like) => like.user.push_token);
+
+        const message = `${store.title}🍳에서 새로운 팩이 나왔어요!🎉`;
+        const data = { storeId: store.id };
+
+        // (최종 발송)
+        if (likedUserTokens.length !== 0) {
+          sendPushNotification(likedUserTokens, message, data);
+        }
+      }
+
+      return newProduct;
     },
     updateProduct: async (
       _,
