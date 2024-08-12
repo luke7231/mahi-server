@@ -8,21 +8,21 @@ datasource db {
 }
 
 model Store {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
   lat       Float
   lng       Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   address   String?
   owner     String?
   likes     Like[]
-   products  Product[] // Store와 Product의 관계 설정
+  products  Product[] // Store와 Product의 관계 설정
 }
 
 model Product {
-  id            Int      @id @default(autoincrement())
-  store         Store    @relation(fields: [storeId], references: [id])
+  id            Int       @id @default(autoincrement())
+  store         Store     @relation(fields: [storeId], references: [id])
   storeId       Int
   name          String
   price         Float
@@ -30,8 +30,8 @@ model Product {
   quantity      Int
   description   String?
   saleEndTime   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
 }
 
 model User {
@@ -62,6 +62,6 @@ model Like {
 }
 
 model Expo_Token {
-  token String @unique
-  createdAt   DateTime  @default(now())
+  token     String   @unique
+  createdAt DateTime @default(now())
 }
