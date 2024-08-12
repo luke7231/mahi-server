@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run compile && npx prisma generate && nodemon ./dist/index.js",
+    "start": "npm run compile && nodemon ./dist/index.js",
+    "build": "npm run compile && npx prisma generate && nodemon ./dist/index.js",
     "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate:dev": "npx prisma migrate dev",
