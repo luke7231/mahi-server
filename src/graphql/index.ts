@@ -165,7 +165,10 @@ export const typeDefs = `
     coupon: String
     productId: Int
   }
-
+  type CompareOrderAmountResult {
+    ok: Boolean!
+    error: String
+  }
   type Mutation {
     createOrder(input: CreateOrderInput!): Order!
     updateOrder(input: UpdateOrderInput!): Order!
@@ -174,6 +177,6 @@ export const typeDefs = `
   type Query {
     orders: [Order!]!
     order(id: Int!): Order
-    compareOrderAmount(orderId: String!, amount: Float!): Boolean! 
+    compareOrderAmount(orderId: String!, amount: Float!, paymentKey: String!): CompareOrderAmountResult! 
   }
 `;
