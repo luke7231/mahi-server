@@ -1,7 +1,4 @@
-import { Store } from "@prisma/client";
 import { prisma } from "../../index.js";
-
-import { Expo } from "expo-server-sdk";
 import { sendPushNotification } from "../../lib/expo-token.js";
 
 export const productResolvers = {
