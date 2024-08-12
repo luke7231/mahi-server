@@ -140,4 +140,39 @@ export const typeDefs = `
   input CreateTokenInput {
     token: String!
   }
+
+
+
+  type Order {
+    id: Int!
+    orderId: String!
+    amount: Float!
+    coupon: String
+    product: Product
+    createdAt: DateTime
+    updatedAt: DateTime
+  }
+  input CreateOrderInput {
+    orderId: String!
+    amount: Float!
+    coupon: String
+    productId: Int!
+  }
+  input UpdateOrderInput {
+    id: Int!
+    orderId: String
+    amount: Float
+    coupon: String
+    productId: Int
+  }
+
+  type Mutation {
+    createOrder(input: CreateOrderInput!): Order!
+    updateOrder(input: UpdateOrderInput!): Order!
+    deleteOrder(orderId: String!): Order!
+  }
+  type Query {
+    orders: [Order!]!
+    order(id: Int!): Order
+  }
 `;
