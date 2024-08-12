@@ -5,6 +5,17 @@ export const orderResolvers = {
     orders: async () => await prisma.order.findMany(),
     order: async (_, { id }) =>
       await prisma.order.findUnique({ where: { id } }),
+    compareOrderAmount: async (_, { orderId, amount }) => {
+      const order = await prisma.order.findUnique({
+        where: { orderId },
+      });
+
+      if (!order) {
+        throw new Error("Order not found");
+      }
+
+      return order.amount === amount;
+    },
   },
   Mutation: {
     createOrder: async (_, { input }) => {

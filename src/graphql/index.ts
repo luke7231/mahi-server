@@ -174,5 +174,6 @@ export const typeDefs = `
   type Query {
     orders: [Order!]!
     order(id: Int!): Order
+    compareOrderAmount(orderId: String!, amount: Float!): Boolean! 
   }
 `;
