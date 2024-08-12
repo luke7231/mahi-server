@@ -1,5 +1,6 @@
 import { prisma } from "../../index.js";
 
+// TODO: 시크릿키 변경
 const widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
 const encryptedSecretKey =
   "Basic " + Buffer.from(widgetSecretKey + ":").toString("base64");
