@@ -7,9 +7,17 @@ const encryptedSecretKey =
 
 export const orderResolvers = {
   Query: {
-    orders: async () => await prisma.order.findMany(),
-    order: async (_, { id }) =>
-      await prisma.order.findUnique({ where: { id } }),
+    orders: async () => {
+      return await prisma.order.findMany({
+        include: { products: true },
+      });
+    },
+    order: async (_, { id }) => {
+      return await prisma.order.findUnique({
+        where: { id: Number(id) },
+        include: { products: true },
+      });
+    },
     compareOrderAmount: async (_, { orderId, amount, paymentKey }) => {
       const order = await prisma.order.findUnique({
         where: { orderId },
@@ -74,27 +82,32 @@ export const orderResolvers = {
     },
   },
   Mutation: {
-    createOrder: async (_, { input }) => {
-      const { orderId, amount, coupon, productId } = input;
-      return await prisma.order.create({
+    createOrder: async (
+      _,
+      { input: { orderId, amount, coupon, productIds } }
+    ) => {
+      const createdOrder = await prisma.order.create({
         data: {
           orderId,
           amount,
           coupon,
-          productId,
+          products: {
+            connect: productIds.map((id) => ({ id })),
+          },
         },
+        include: { products: true },
       });
+      return createdOrder;
     },
     // 아직 안쓸 것 같긴해요. (gpt가 써준 거.)
     updateOrder: async (_, { input }) => {
-      const { id, orderId, amount, coupon, productId } = input;
+      const { id, orderId, amount, coupon } = input;
       return await prisma.order.update({
         where: { id },
         data: {
           orderId,
           amount,
           coupon,
-          productId,
         },
       });
     },
@@ -104,7 +117,10 @@ export const orderResolvers = {
     },
   },
   Order: {
-    product: async (parent) =>
-      await prisma.product.findUnique({ where: { id: parent.productId } }),
+    products: async (parent) => {
+      return await prisma.product.findMany({
+        where: { id: { in: parent.productIds } },
+      });
+    },
   },
 };

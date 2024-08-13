@@ -149,7 +149,7 @@ export const typeDefs = `
     orderId: String!
     amount: Float!
     coupon: String
-    product: Product
+    products: [Product!]!
     createdAt: DateTime
     updatedAt: DateTime
   }
@@ -157,14 +157,14 @@ export const typeDefs = `
     orderId: String!
     amount: Float!
     coupon: String
-    productId: Int!
+    productIds: [Int!]!  # Product IDs 리스트를 입력받음
   }
   input UpdateOrderInput {
     id: Int!
     orderId: String
     amount: Float
     coupon: String
-    productId: Int
+    productIds: [Int!]
   }
   type CompareOrderAmountResult {
     ok: Boolean!
