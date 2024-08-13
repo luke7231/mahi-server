@@ -12,6 +12,7 @@ export const typeDefs = `
   }
 
   type Query {
+    store(id: Int!): Store
     stores(lat: Float, lng: Float, userId: Int): [Store]
     likedStores(userId: Int!): [Store!]
   }

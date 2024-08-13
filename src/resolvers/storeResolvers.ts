@@ -3,6 +3,19 @@ import { prisma } from "../index.js";
 
 export const storeResolvers = {
   Query: {
+    store: async (_, { id }) => {
+      try {
+        const store = await prisma.store.findUnique({
+          where: { id: id },
+        });
+        if (!store) {
+          throw new Error("Store not found");
+        }
+        return store;
+      } catch (error) {
+        throw new Error("Error fetching store");
+      }
+    },
     //고도화
     stores: async (
       _,
