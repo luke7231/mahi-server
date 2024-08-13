@@ -18,6 +18,8 @@ model Store {
   owner     String?
   likes     Like[]
   products  Product[] // Store와 Product의 관계 설정
+
+  @@map("store")
 }
 
 model Product {
@@ -33,6 +35,8 @@ model Product {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
   Order         Order[]
+
+  @@map("product")
 }
 
 model User {
@@ -48,6 +52,8 @@ model User {
   updatedAt   DateTime  @default(now()) @updatedAt
   likes       Like[]
   push_token  String?
+
+  @@map("user")
 }
 
 model Order {
@@ -59,6 +65,8 @@ model Order {
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("order")
 }
 
 model Like {
@@ -71,9 +79,13 @@ model Like {
 
   @@unique([userId, storeId])
   @@index([storeId], map: "Like_storeId_fkey")
+
+  @@map("like")
 }
 
 model Expo_Token {
   token     String   @unique
   createdAt DateTime @default(now())
+  
+  @@map("expo_Token")
 }
