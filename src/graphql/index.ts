@@ -74,9 +74,9 @@ export const typeDefs = `
 
   type User {
     id: Int!
-    name: String!
+    name: String
     email: String!
-    password: String!
+    password: String
     phone: String
     dateOfBirth: DateTime
     gender: String
@@ -90,6 +90,7 @@ export const typeDefs = `
   type Query {
     users: [User!]!
     user(id: Int!): User!
+    login(code: String!, client_id: String!, redirect_url: String!): User
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
