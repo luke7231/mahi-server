@@ -11,11 +11,13 @@ import cors from "cors";
 import { typeDefs } from "./graphql/index.js";
 import { resolvers } from "./resolvers/index.js";
 import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 interface MyContext {
   token?: string;
 }
 
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 export const prisma = new PrismaClient();
 // Required logic for integrating with Express
 const app = express();
@@ -44,7 +46,20 @@ app.use(
   // expressMiddleware accepts the same arguments:
   // an Apollo Server instance and optional configuration options
   expressMiddleware(server, {
-    context: async ({ req }) => ({ token: req.headers.token }),
+    context: async ({ req }) => {
+      const token = req.headers.authorization || "";
+
+      if (token) {
+        try {
+          const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
+          return { user: decoded }; // 유저 정보를 context에 추가
+        } catch (err) {
+          throw new Error("Invalid/Expired token");
+        }
+      }
+
+      return {};
+    },
   })
 );
 
