@@ -1,7 +1,11 @@
+import dotenv from "dotenv";
+
+dotenv.config();
 import jwt from "jsonwebtoken";
-const SECRET_KEY = process.env.JWT_SECRET_KEY || "your-secret-key";
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 export const generateToken = (user) => {
+  console.log(SECRET_KEY);
   return jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
     expiresIn: "1y", // 토큰 유효 기간 설정
   });
