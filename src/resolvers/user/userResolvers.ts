@@ -12,9 +12,9 @@ export const userResolvers = {
           const res = await axios.post(
             postUrl,
             {
-              grant_type,
-              client_id,
-              code,
+              grant_type, // 고정
+              client_id, // REST API KEY
+              code, // 인가 코드
               redirect_url,
             },
             {
