@@ -71,6 +71,7 @@ export const userResolvers = {
               user = await prisma.user.create({
                 data: {
                   email: kakaoEmail,
+                  kakaoId: userInfo.id,
                 },
               });
               console.log("newUser: ", user);
