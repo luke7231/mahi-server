@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `appleId` INTEGER NULL,
+    ADD COLUMN `kakaoId` INTEGER NULL;

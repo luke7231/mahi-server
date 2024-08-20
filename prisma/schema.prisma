@@ -52,6 +52,8 @@ model User {
   updatedAt   DateTime  @default(now()) @updatedAt
   likes       Like[]
   push_token  String?
+  kakaoId     Int?
+  appleId     Int?
 
   @@map("user")
 }
@@ -78,7 +80,6 @@ model Like {
 
   @@unique([userId, storeId])
   @@index([storeId], map: "Like_storeId_fkey")
-  
   @@map("like")
 }
 
