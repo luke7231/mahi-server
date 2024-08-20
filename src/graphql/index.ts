@@ -90,7 +90,7 @@ export const typeDefs = `
   type Query {
     users: [User!]!
     user(id: Int!): User!
-    login(code: String!, client_id: String!, redirect_url: String!): User
+    login(code: String!, client_id: String!, redirect_url: String!): LoginResult!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
@@ -115,6 +115,10 @@ export const typeDefs = `
     gender: String
     address: String
     push_token: String
+  }
+  type LoginResult {
+    user: User
+    token: String!
   }
   
   type Like {
