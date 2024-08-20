@@ -54,6 +54,7 @@ model User {
   push_token  String?
   kakaoId     BigInt?
   appleId     BigInt?
+  isDeleted   Boolean?
 
   @@map("user")
 }
