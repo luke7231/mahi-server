@@ -4,7 +4,7 @@ import { generateToken } from "../../lib/jwt-token.js";
 
 export const userResolvers = {
   Query: {
-    login: async (_, { code, client_id, redirect_url }) => {
+    kakaoLogin: async (_, { code, client_id, redirect_url }) => {
       try {
         const postUrl = "https://kauth.kakao.com/oauth/token";
         const grant_type = "authorization_code";

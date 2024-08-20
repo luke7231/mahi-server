@@ -90,7 +90,7 @@ export const typeDefs = `
   type Query {
     users: [User!]!
     user(id: Int!): User!
-    login(code: String!, client_id: String!, redirect_url: String!): LoginResult!
+    kakaoLogin(code: String!, client_id: String!, redirect_url: String!): kakaoLoginResult!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
@@ -116,7 +116,7 @@ export const typeDefs = `
     address: String
     push_token: String
   }
-  type LoginResult {
+  type kakaoLoginResult {
     user: User
     token: String!
   }
