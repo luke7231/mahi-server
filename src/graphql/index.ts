@@ -95,6 +95,7 @@ export const typeDefs = `
   type Mutation {
     createUser(data: CreateUserInput!): User!
     updateUser(id: Int!, data: UpdateUserInput!): User!
+    kakaoDeleteUser: kakaoDeleteResult
   }
   input CreateUserInput {
     name: String!
@@ -119,6 +120,10 @@ export const typeDefs = `
   type kakaoLoginResult {
     user: User
     token: String!
+  }
+  type kakaoDeleteResult {
+    ok: Boolean!
+    error: String
   }
   
   type Like {

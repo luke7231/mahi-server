@@ -1,7 +1,17 @@
 import axios from "axios";
 import { prisma } from "../../index.js";
 import { generateToken } from "../../lib/jwt-token.js";
+import dotenv from "dotenv";
+dotenv.config();
 
+const KAKAO_UNLINK_URL = "https://kapi.kakao.com/v1/user/unlink";
+
+interface Context {
+  user: {
+    id: number;
+    email: string;
+  };
+}
 export const userResolvers = {
   Query: {
     kakaoLogin: async (_, { code, client_id, redirect_url }) => {
@@ -75,6 +85,20 @@ export const userResolvers = {
                 },
               });
               console.log("newUser: ", user);
+            } else {
+              if (user.isDeleted) {
+                // 삭제했다가 다시 돌아온 경우.
+                await prisma.user.update({
+                  where: {
+                    email: kakaoEmail,
+                  },
+                  data: {
+                    isDeleted: false,
+                    email: kakaoEmail,
+                    kakaoId: userInfo.id,
+                  },
+                });
+              }
             }
 
             // JWT 토큰 생성
@@ -114,6 +138,56 @@ export const userResolvers = {
         data,
       });
       return updatedUser;
+    },
+    kakaoDeleteUser: async (_, __, { user }: Context) => {
+      if (!user) {
+        throw new Error("Authentication required");
+      }
+      console.log(user);
+
+      // 유저 정보 가져오기
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+
+      if (!existingUser.id) {
+        throw new Error("User not found");
+      }
+
+      // const formUrlEncoded = (x) =>
+      //   Object.keys(x).reduce(
+      //     (p, c) => p + `&${c}=${encodeURIComponent(x[c])}`,
+      //     ""
+      //   );
+      // 카카오와 연결 끊기 요청
+      try {
+        await axios.post(
+          KAKAO_UNLINK_URL,
+          {
+            target_id_type: "user_id", // 카카오에서 지정된 ID 유형
+            target_id: existingUser.kakaoId, // 카카오 사용자 ID
+          },
+          {
+            headers: {
+              "Content-type": "application/x-www-form-urlencoded",
+              Authorization: `KakaoAK ${process.env.KAKAO_ADMIN_KEY}`, // kakao 어드민 키 사용
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Failed to unlink Kakao account:", error);
+        throw new Error("Failed to unlink Kakao account");
+      }
+
+      // 유저 삭제 처리
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          isDeleted: true,
+        },
+      });
+
+      return { ok: true, error: null };
     },
   },
   User: {
