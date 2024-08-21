@@ -129,7 +129,7 @@ export const userResolvers = {
           user = await prisma.user.create({
             data: {
               email: appleEmail,
-              appleId: Number(sub),
+              appleId: sub,
             },
           });
           console.log("[appleLogin]newUser: ", user);
