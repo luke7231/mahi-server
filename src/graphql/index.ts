@@ -9,6 +9,7 @@ export const typeDefs = `
     likes: [Like!]
     isLiked: Boolean
     products: [Product!]
+    img: String
   }
 
   type Query {
@@ -38,6 +39,7 @@ export const typeDefs = `
     saleEndTime: DateTime
     createdAt: DateTime!
     updatedAt: DateTime!
+    img: String
   }
 
   type Query {
