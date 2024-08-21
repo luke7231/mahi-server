@@ -61,7 +61,8 @@ export const storeResolvers = {
       });
       return newArray;
     },
-    likedStores: async (_, { userId }) => {
+    likedStores: async (_, { userId }, context) => {
+      console.log("😗", context);
       const likes = await prisma.like.findMany({
         where: { userId },
         include: { store: true },

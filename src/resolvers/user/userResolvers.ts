@@ -92,7 +92,9 @@ export const userResolvers = {
                   "[kakaoLogin]애플 계정으로 가입한 적이 있습니다. 해당 계정을 사용해주세요!"
                 );
                 // 카카오 계정이 잘 살아있을 때
-                throw new Error("400: Apple user exist");
+                throw new Error(
+                  "이미 가입한 애플 계정이 있습니다! 해당 계정을 사용해주세요🙇🏻‍♂️🙇🏻‍♂️"
+                );
               }
             }
 
@@ -105,7 +107,7 @@ export const userResolvers = {
         }
         return null;
       } catch (e) {
-        console.log(e);
+        throw new Error(e);
       }
     },
     appleLogin: async (_, { id_token }) => {
@@ -137,7 +139,9 @@ export const userResolvers = {
           if (user.kakaoId) {
             console.log("[appleLogin]카카오으로 가입한 계정이 있습니다.");
             // 카카오 계정이 잘 살아있을 때
-            throw new Error("400: kakao user exist");
+            throw new Error(
+              "이미 가입한 카카오 계정이 있습니다! 해당 계정을 사용해주세요🙇🏻‍♂️🙇🏻‍♂️"
+            );
           }
         }
 
