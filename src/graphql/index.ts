@@ -97,7 +97,7 @@ export const typeDefs = `
     createUser(data: CreateUserInput!): User!
     updateUser(id: Int!, data: UpdateUserInput!): User!
     kakaoDeleteUser: kakaoDeleteResult
-    appleDeleteUser: appleDeleteResult
+    appleDeleteUser(code: String!): appleDeleteResult
   }
   input CreateUserInput {
     name: String!
@@ -131,10 +131,10 @@ export const typeDefs = `
     ok: Boolean!
     error: String
   }
-  type appleDeleteResult {[
+  type appleDeleteResult {
     ok: Boolean!
     error: String
-  ]}
+  }
   
   type Like {
     id: Int!

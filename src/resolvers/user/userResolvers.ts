@@ -214,6 +214,124 @@ export const userResolvers = {
 
       return { ok: true, error: null };
     },
+    appleDeleteUser: async (_, { code }) => {
+      const createSignWithAppleSecret = () => {
+        const signWithApplePrivateKey = process.env.APPLE_SECRET_KEY.replace(
+          /\\n/g,
+          "\n"
+        ); // 줄 바꿈 처리
+
+        // 현재 시간을 기준으로 생성
+        const now = Math.floor(Date.now() / 1000);
+
+        const payload = {
+          iss: process.env.APPLE_TEAM_ID, // Apple Team ID
+          iat: now, // Issued at (현재 시간)
+          exp: now + 3600, // Expiration (1시간 후)
+          aud: "https://appleid.apple.com", // Audience
+          sub: "com.luke7299.mahi-sign-in", // Service ID or App ID
+        };
+
+        const options = {
+          algorithm: "ES256",
+          header: {
+            kid: process.env.APPLE_KEY_ID, // Key ID
+          },
+        };
+
+        const token = jwt.sign(payload, signWithApplePrivateKey, options);
+
+        return token;
+      };
+
+      const getAppleToken = async (code: string) => {
+        try {
+          const response = await axios.post(
+            "https://appleid.apple.com/auth/token",
+            qs.stringify({
+              grant_type: "authorization_code",
+              code,
+              client_secret: createSignWithAppleSecret(),
+              client_id: "com.luke7299.mahi-sign-in",
+              redirect_uri: process.env.APPLE_REDIRECT_URI,
+            }),
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          return response.data;
+        } catch (e) {
+          console.error("Error:", e.response?.data || e.message);
+        }
+      };
+
+      const { access_token, refresh_token } = await getAppleToken(code);
+
+      const revokeAccessToken = async (token: string) => {
+        try {
+          const response = await axios.post(
+            "https://appleid.apple.com/auth/revoke",
+            qs.stringify({
+              client_id: "com.luke7299.mahi-sign-in", // Replace with your actual client ID
+              client_secret: createSignWithAppleSecret(), // Function to generate your client secret
+              token, // The token you want to revoke
+              token_type_hint: "access_token", // Type of token being revoked
+            }),
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          return response;
+        } catch (e) {
+          console.error("Error:", e.response?.data || e.message);
+        }
+      };
+
+      const revokeRefreshToken = async (refreshToken: string) => {
+        try {
+          const response = await axios.post(
+            "https://appleid.apple.com/auth/revoke",
+            qs.stringify({
+              client_id: "com.luke7299.mahi-sign-in", // Replace with your actual client ID
+              client_secret: createSignWithAppleSecret(), // Function to generate your client secret
+              token: refreshToken, // The refresh token you want to revoke
+              token_type_hint: "refresh_token", // Specify that the token is a refresh token
+            }),
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          return response;
+        } catch (e) {
+          console.error("Error:", e.response?.data || e.message);
+        }
+      };
+
+      const { status: revokeAccessStatue } = await revokeAccessToken(
+        access_token
+      );
+      const { status: revokeRefreshStatus } = await revokeRefreshToken(
+        refresh_token
+      );
+
+      if (revokeAccessStatue == 200 && revokeRefreshStatus == 200) {
+        return {
+          ok: true,
+          error: null,
+        };
+      } else {
+        return {
+          ok: false,
+          error: "Failed to revoke token!",
+        };
+      }
+    },
   },
   User: {
     likes: async (parent) => {
