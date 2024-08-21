@@ -1,6 +1,8 @@
 import axios from "axios";
 import { prisma } from "../../index.js";
 import { generateToken } from "../../lib/jwt-token.js";
+import jwt from "jsonwebtoken";
+import * as qs from "querystring";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -112,6 +114,29 @@ export const userResolvers = {
       } catch (e) {
         console.log(e);
       }
+    },
+    appleLogin: async (_, { id_token }) => {
+      try {
+        // const res = await getAppleToken(code);
+        // console.log(res);
+        const { sub: id, email } = (jwt.decode(id_token) ?? {}) as {
+          sub: string;
+          email: string;
+          name?: string;
+        };
+        if (id) {
+          return {
+            token: "",
+            user: {
+              id,
+              email,
+            },
+          };
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+      return null;
     },
     users: async () => {
       const users = await prisma.user.findMany();
