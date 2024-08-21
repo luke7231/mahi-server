@@ -214,7 +214,7 @@ export const userResolvers = {
 
       return { ok: true, error: null };
     },
-    appleDeleteUser: async (_, { code }) => {
+    appleDeleteUser: async (_, { code }, { user }: Context) => {
       const createSignWithAppleSecret = () => {
         const signWithApplePrivateKey = process.env.APPLE_SECRET_KEY.replace(
           /\\n/g,
@@ -321,6 +321,14 @@ export const userResolvers = {
       );
 
       if (revokeAccessStatue == 200 && revokeRefreshStatus == 200) {
+        await prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            isDeleted: true,
+          },
+        });
         return {
           ok: true,
           error: null,
