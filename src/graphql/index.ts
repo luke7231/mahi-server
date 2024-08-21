@@ -91,7 +91,7 @@ export const typeDefs = `
     users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!): kakaoLoginResult!
-    appleLogin(code: String!, id_token: String!): appleLoginResult!
+    appleLogin(id_token: String!): appleLoginResult!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
