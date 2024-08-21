@@ -205,12 +205,13 @@ export const userResolvers = {
       }
 
       // 유저 삭제 처리
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          isDeleted: true,
-        },
-      });
+      try {
+        await prisma.user.delete({
+          where: { id: user.id },
+        });
+      } catch (e) {
+        console.error("Error:", e.response?.data || e.message);
+      }
 
       return { ok: true, error: null };
     },
@@ -321,14 +322,16 @@ export const userResolvers = {
       );
 
       if (revokeAccessStatue == 200 && revokeRefreshStatus == 200) {
-        await prisma.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            isDeleted: true,
-          },
-        });
+        try {
+          await prisma.user.delete({
+            where: {
+              id: user.id,
+            },
+          });
+        } catch (e) {
+          console.error("Error:", e.response?.data || e.message);
+        }
+
         return {
           ok: true,
           error: null,
