@@ -117,21 +117,55 @@ export const userResolvers = {
     },
     appleLogin: async (_, { id_token }) => {
       try {
-        // const res = await getAppleToken(code);
-        // console.log(res);
-        const { sub: id, email } = (jwt.decode(id_token) ?? {}) as {
+        const { sub, email } = (jwt.decode(id_token) ?? {}) as {
           sub: string;
           email: string;
-          name?: string;
         };
-        if (id) {
-          return {
-            token: "",
-            user: {
-              id,
+
+        console.log(sub);
+        if (sub) {
+          // 토큰 해독이 잘 됐다면?
+          // 유저를 찾는다.
+          let user = await prisma.user.findUnique({
+            where: {
               email,
             },
-          };
+          });
+          console.log("기존 유저 발견:", user);
+
+          if (user) {
+            // 이미 카카오로 가입한 경우.
+            if (user.kakaoId) {
+              console.log("카카오으로 가입한 계정이 있습니다.");
+              // 카카오 계정이 잘 살아있을 때
+              throw new Error("400: kakao user exist");
+            }
+
+            if (user.appleId) {
+              // 로그인
+              console.log("이미 애플아이디가 있네요!");
+              const token = generateToken(user);
+
+              return {
+                user,
+                token,
+              };
+            }
+          } else {
+            // 회원가입
+            const newAppleUser = await prisma.user.create({
+              data: {
+                email,
+                appleId: Number(sub),
+              },
+            });
+            const token = generateToken(newAppleUser);
+
+            return {
+              user: newAppleUser,
+              token,
+            };
+          }
         }
       } catch (e) {
         throw new Error(e);
