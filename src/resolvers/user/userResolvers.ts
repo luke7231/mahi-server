@@ -67,7 +67,6 @@ export const userResolvers = {
         if (accessToken) {
           // kakao v2 -> user/me
           const userInfo = await requestUserInfo(accessToken);
-          // console.log("userInfo: ", userInfo);
           if (userInfo.id) {
             const kakaoEmail = userInfo.kakao_account.email;
             // 키카오 이메일로 서비스 db 조회
@@ -76,7 +75,7 @@ export const userResolvers = {
                 email: kakaoEmail,
               },
             });
-            console.log("existUser:", user);
+            console.log("[kakaoLogin]DB 기존 유저 발견:", user);
 
             if (!user) {
               // 없으면 [회원가입].
@@ -86,26 +85,20 @@ export const userResolvers = {
                   kakaoId: userInfo.id,
                 },
               });
-              console.log("newUser: ", user);
+              console.log("[kakaoLogin]newUser: ", user);
             } else {
-              if (user.isDeleted) {
-                // 삭제했다가 다시 돌아온 경우.
-                await prisma.user.update({
-                  where: {
-                    email: kakaoEmail,
-                  },
-                  data: {
-                    isDeleted: false,
-                    email: kakaoEmail,
-                    kakaoId: userInfo.id,
-                  },
-                });
+              if (user.appleId) {
+                console.log(
+                  "[kakaoLogin]애플 계정으로 가입한 적이 있습니다. 해당 계정을 사용해주세요!"
+                );
+                // 카카오 계정이 잘 살아있을 때
+                throw new Error("400: Apple user exist");
               }
             }
 
             // JWT 토큰 생성
             const token = generateToken(user);
-            console.log("id:", user.id, "token:", token);
+            console.log("[kakaoLogin]", "id:", user.id, "token:", token);
 
             return { user, token }; // 유저 정보와 토큰 반환
           }
@@ -116,59 +109,43 @@ export const userResolvers = {
       }
     },
     appleLogin: async (_, { id_token }) => {
-      try {
-        const { sub, email } = (jwt.decode(id_token) ?? {}) as {
-          sub: string;
-          email: string;
-        };
+      const { sub, email: appleEmail } = (jwt.decode(id_token) ?? {}) as {
+        sub: string;
+        email: string;
+      };
 
-        console.log(sub);
-        if (sub) {
-          // 토큰 해독이 잘 됐다면?
-          // 유저를 찾는다.
-          let user = await prisma.user.findUnique({
-            where: {
-              email,
+      console.log("sub:", sub);
+      if (sub) {
+        // 토큰 해독이 잘 됐다면?
+        // 유저를 찾는다.
+        let user = await prisma.user.findUnique({
+          where: {
+            email: appleEmail,
+          },
+        });
+        console.log("[appleLogin]DB 기존 유저 발견:", user);
+
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email: appleEmail,
+              appleId: Number(sub),
             },
           });
-          console.log("기존 유저 발견:", user);
-
-          if (user) {
-            // 이미 카카오로 가입한 경우.
-            if (user.kakaoId) {
-              console.log("카카오으로 가입한 계정이 있습니다.");
-              // 카카오 계정이 잘 살아있을 때
-              throw new Error("400: kakao user exist");
-            }
-
-            if (user.appleId) {
-              // 로그인
-              console.log("이미 애플아이디가 있네요!");
-              const token = generateToken(user);
-
-              return {
-                user,
-                token,
-              };
-            }
-          } else {
-            // 회원가입
-            const newAppleUser = await prisma.user.create({
-              data: {
-                email,
-                appleId: Number(sub),
-              },
-            });
-            const token = generateToken(newAppleUser);
-
-            return {
-              user: newAppleUser,
-              token,
-            };
+          console.log("[appleLogin]newUser: ", user);
+        } else {
+          if (user.kakaoId) {
+            console.log("[appleLogin]카카오으로 가입한 계정이 있습니다.");
+            // 카카오 계정이 잘 살아있을 때
+            throw new Error("400: kakao user exist");
           }
         }
-      } catch (e) {
-        throw new Error(e);
+
+        // JWT 토큰 생성
+        const token = generateToken(user);
+        console.log("[appleLogin]", "id:", user.id, "token:", token);
+
+        return { user, token }; // 유저 정보와 토큰 반환
       }
       return null;
     },
