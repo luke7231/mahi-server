@@ -4,6 +4,7 @@ import { generateToken } from "../../lib/jwt-token.js";
 import jwt from "jsonwebtoken";
 import * as qs from "querystring";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 dotenv.config();
 
 const KAKAO_UNLINK_URL = "https://kapi.kakao.com/v1/user/unlink";
@@ -357,6 +358,57 @@ export const userResolvers = {
           error: "Failed to revoke token!",
         };
       }
+    },
+    pureSignup: async (
+      _,
+      { email, password }: { email: string; password: string }
+    ) => {
+      // 이메일 중복 확인
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        throw new Error("이미 사용 중인 이메일입니다!🤯");
+      }
+
+      // 비밀번호 해시화
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // 유저 생성
+      const user = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+        },
+      });
+
+      const token = generateToken(user);
+
+      return { user, token };
+    },
+    pureLogin: async (
+      _,
+      { email, password }: { email: string; password: string }
+    ) => {
+      // 유저 찾기
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new Error("이메일/비밀번호가 일치하지 않습니다.");
+      }
+
+      // 비밀번호 확인
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        throw new Error("이메일/비밀번호가 일치하지 않습니다.");
+      }
+
+      const token = generateToken(user);
+
+      return { user, token };
     },
   },
   User: {

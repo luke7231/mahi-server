@@ -100,6 +100,8 @@ export const typeDefs = `
     updateUser(id: Int!, data: UpdateUserInput!): User!
     kakaoDeleteUser: kakaoDeleteResult
     appleDeleteUser(code: String!): appleDeleteResult
+    pureSignup(email:String!, password: String!): pureSignResult
+    pureLogin(email:String!, password: String!): pureSignResult
   }
   input CreateUserInput {
     name: String!
@@ -136,6 +138,10 @@ export const typeDefs = `
   type appleDeleteResult {
     ok: Boolean!
     error: String
+  }
+  type pureSignResult {
+    user: User
+    token: String!
   }
   
   type Like {
