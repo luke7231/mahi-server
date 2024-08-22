@@ -46,7 +46,7 @@ export const storeResolvers = {
       ORDER BY distance ASC;
       `;
 
-      if (!user.id) return storesWithDistance;
+      if (!user) return storesWithDistance;
       const likes = await prisma.like.findMany({
         where: { userId: user.id },
       });
