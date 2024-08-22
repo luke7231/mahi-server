@@ -186,6 +186,8 @@ export const typeDefs = `
     products: [Product!]!
     createdAt: DateTime
     updatedAt: DateTime
+    totalQuantity: Int!
+    totalDiscount: Float! 
   }
   input CreateOrderInput {
     orderId: String!
