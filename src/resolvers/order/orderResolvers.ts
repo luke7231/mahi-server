@@ -7,10 +7,16 @@ const encryptedSecretKey =
 
 export const orderResolvers = {
   Query: {
-    orders: async () => {
-      return await prisma.order.findMany({
+    orders: async (_, __, { user }) => {
+      const orders = await prisma.order.findMany({
+        where: {
+          userId: user.id,
+        },
         include: { products: true },
+        orderBy: { createdAt: "desc" },
       });
+      console.log(orders);
+      return orders;
     },
     order: async (_, { id }) => {
       return await prisma.order.findUnique({
@@ -84,10 +90,12 @@ export const orderResolvers = {
   Mutation: {
     createOrder: async (
       _,
-      { input: { orderId, amount, coupon, productIds } }
+      { input: { orderId, amount, coupon, productIds } },
+      { user }
     ) => {
       const createdOrder = await prisma.order.create({
         data: {
+          user: { connect: { id: user.id } },
           orderId,
           amount,
           coupon,
