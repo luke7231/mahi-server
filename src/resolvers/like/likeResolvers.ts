@@ -2,12 +2,12 @@ import { prisma } from "../../index.js";
 
 export const likeResolvers = {
   Mutation: {
-    likeStore: async (_, { userId, storeId }) => {
+    likeStore: async (_, { storeId }, { user }) => {
       // Check if the like already exists
       const existingLike = await prisma.like.findUnique({
         where: {
           userId_storeId: {
-            userId,
+            userId: user.id,
             storeId,
           },
         },
@@ -25,7 +25,7 @@ export const likeResolvers = {
       // Create a new like entry
       const newLike = await prisma.like.create({
         data: {
-          user: { connect: { id: userId } },
+          user: { connect: { id: user.id } },
           store: { connect: { id: storeId } },
         },
         include: {
@@ -35,14 +35,11 @@ export const likeResolvers = {
       });
       return newLike;
     },
-    cancelLike: async (
-      _,
-      { userId, storeId }: { userId: number; storeId: number }
-    ) => {
+    cancelLike: async (_, { storeId }, { user }) => {
       const like = await prisma.like.findUnique({
         where: {
           userId_storeId: {
-            userId,
+            userId: user.id,
             storeId,
           },
         },
@@ -55,7 +52,7 @@ export const likeResolvers = {
       const deletedLike = await prisma.like.delete({
         where: {
           userId_storeId: {
-            userId,
+            userId: user.id,
             storeId,
           },
         },

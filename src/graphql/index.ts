@@ -158,8 +158,8 @@ export const typeDefs = `
     store: Store
   }
   type Mutation {
-    likeStore(userId: Int!, storeId: Int!): Like!
-    cancelLike(userId: Int!, storeId: Int!): Like!
+    likeStore(storeId: Int!): Like!
+    cancelLike(storeId: Int!): Like!
   }
 
   scalar DateTime
