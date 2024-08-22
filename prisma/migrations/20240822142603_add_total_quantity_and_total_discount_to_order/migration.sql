@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `order` ADD COLUMN `totalDiscount` DOUBLE NOT NULL DEFAULT 0,
+    ADD COLUMN `totalQuantity` INTEGER NOT NULL DEFAULT 0;

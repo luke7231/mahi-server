@@ -190,6 +190,8 @@ export const typeDefs = `
   input CreateOrderInput {
     orderId: String!
     amount: Float!
+    totalQuantity: Int!
+    totalDiscount: Float!
     coupon: String
     productIds: [Int!]!  # Product IDs 리스트를 입력받음
   }

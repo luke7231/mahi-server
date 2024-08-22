@@ -90,7 +90,16 @@ export const orderResolvers = {
   Mutation: {
     createOrder: async (
       _,
-      { input: { orderId, amount, coupon, productIds } },
+      {
+        input: {
+          orderId,
+          amount,
+          coupon,
+          productIds,
+          totalQuantity,
+          totalDiscount,
+        },
+      },
       { user }
     ) => {
       const createdOrder = await prisma.order.create({
@@ -98,6 +107,8 @@ export const orderResolvers = {
           user: { connect: { id: user.id } },
           orderId,
           amount,
+          totalQuantity,
+          totalDiscount,
           coupon,
           products: {
             connect: productIds.map((id) => ({ id })),
