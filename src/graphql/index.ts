@@ -92,15 +92,15 @@ export const typeDefs = `
   type Query {
     users: [User!]!
     user(id: Int!): User!
-    kakaoLogin(code: String!, client_id: String!, redirect_url: String!): kakaoLoginResult!
-    appleLogin(id_token: String!): appleLoginResult!
+    kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
+    appleLogin(id_token: String!, push_token: String): appleLoginResult!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
     updateUser(id: Int!, data: UpdateUserInput!): User!
     kakaoDeleteUser: kakaoDeleteResult
     appleDeleteUser(code: String!): appleDeleteResult
-    pureSignup(email:String!, password: String!): pureSignResult
+    pureSignup(email:String!, password: String!, push_token: String): pureSignResult
     pureLogin(email:String!, password: String!): pureSignResult
   }
   input CreateUserInput {
