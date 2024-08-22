@@ -170,6 +170,7 @@ export const typeDefs = `
   }
   type Mutation {
     createToken(data: CreateTokenInput!): Token!
+    setTokenToUser(push_token: String!): Boolean!
   }
   input CreateTokenInput {
     token: String!

@@ -25,5 +25,26 @@ export const tokenResolvers = {
       });
       return newToken;
     },
+    setTokenToUser: async (_, { push_token }, { user }) => {
+      const existUser = await prisma.user.findUnique({
+        where: {
+          id: user.id,
+        },
+      });
+
+      if (!existUser.push_token) {
+        await prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            push_token,
+          },
+        });
+
+        return true;
+      }
+      return false;
+    },
   },
 };
