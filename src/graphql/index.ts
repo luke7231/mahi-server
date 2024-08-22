@@ -15,7 +15,7 @@ export const typeDefs = `
   type Query {
     store(id: Int!): Store
     stores(lat: Float, lng: Float): [Store]
-    likedStores(userId: Int!): [Store!]
+    likedStores: [Store!]
   }
 
   type Mutation {
