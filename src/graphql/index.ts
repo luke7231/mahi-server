@@ -102,6 +102,7 @@ export const typeDefs = `
     appleDeleteUser(code: String!): appleDeleteResult
     pureSignup(email:String!, password: String!, push_token: String): pureSignResult
     pureLogin(email:String!, password: String!): pureSignResult
+    pureDeleteUser: pureDeleteUserResult
   }
   input CreateUserInput {
     name: String!
@@ -142,6 +143,10 @@ export const typeDefs = `
   type pureSignResult {
     user: User
     token: String!
+  }
+  type pureDeleteUserResult {
+    ok: Boolean!
+    error: String
   }
   
   type Like {

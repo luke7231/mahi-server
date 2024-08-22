@@ -417,6 +417,27 @@ export const userResolvers = {
 
       return { user, token };
     },
+    pureDeleteUser: async (_, __, { user }: Context) => {
+      if (!user) {
+        throw new Error("삭제할 유저가 존재하지 않습니다.");
+      }
+
+      // 유저 확인
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+
+      if (!existingUser) {
+        throw new Error("토큰이 존재하지 않습니다.");
+      }
+
+      // 유저 삭제
+      await prisma.user.delete({
+        where: { id: user.id },
+      });
+
+      return { ok: true, error: null };
+    },
   },
   User: {
     likes: async (parent) => {
