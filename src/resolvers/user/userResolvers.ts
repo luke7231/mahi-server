@@ -17,7 +17,7 @@ interface Context {
 }
 export const userResolvers = {
   Query: {
-    kakaoLogin: async (_, { code, client_id, redirect_url }) => {
+    kakaoLogin: async (_, { code, client_id, redirect_url, push_token }) => {
       try {
         const postUrl = "https://kauth.kakao.com/oauth/token";
         const grant_type = "authorization_code";
@@ -84,6 +84,7 @@ export const userResolvers = {
                 data: {
                   email: kakaoEmail,
                   kakaoId: userInfo.id,
+                  push_token,
                 },
               });
               console.log("[kakaoLogin]newUser: ", user);
@@ -111,7 +112,7 @@ export const userResolvers = {
         throw new Error(e);
       }
     },
-    appleLogin: async (_, { id_token }) => {
+    appleLogin: async (_, { id_token, push_token }) => {
       const { sub, email: appleEmail } = (jwt.decode(id_token) ?? {}) as {
         sub: string;
         email: string;
@@ -133,6 +134,7 @@ export const userResolvers = {
             data: {
               email: appleEmail,
               appleId: sub,
+              push_token,
             },
           });
           console.log("[appleLogin]newUser: ", user);
@@ -361,7 +363,11 @@ export const userResolvers = {
     },
     pureSignup: async (
       _,
-      { email, password }: { email: string; password: string }
+      {
+        email,
+        password,
+        push_token,
+      }: { email: string; password: string; push_token?: string }
     ) => {
       // 이메일 중복 확인
       const existingUser = await prisma.user.findUnique({
@@ -380,6 +386,7 @@ export const userResolvers = {
         data: {
           email,
           password: hashedPassword,
+          push_token,
         },
       });
 
