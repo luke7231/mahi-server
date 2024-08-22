@@ -19,7 +19,8 @@ export const storeResolvers = {
     //고도화
     stores: async (
       _,
-      { lat, lng, userId }: { lat?: number; lng?: number; userId?: number } // TODO: token에서 뽑기?
+      { lat, lng }: { lat?: number; lng?: number },
+      { user } // TODO: token에서 뽑기?
     ) => {
       const latitude = lat || 37.4552003863507; // 가천대
       const longitude = lng || 127.13370255097; // 가천대
@@ -45,9 +46,9 @@ export const storeResolvers = {
       ORDER BY distance ASC;
       `;
 
-      if (!userId) return storesWithDistance;
+      if (!user.id) return storesWithDistance;
       const likes = await prisma.like.findMany({
-        where: { userId },
+        where: { userId: user.id },
       });
       const likeIds = likes.map((like) => like.storeId);
       const set = new Set(likeIds);
