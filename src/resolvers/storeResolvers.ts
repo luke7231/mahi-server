@@ -30,11 +30,7 @@ export const storeResolvers = {
       // ToDO: 페이지 네이션 (무한 스크롤)
       const storesWithDistance = await prisma.$queryRaw`
       SELECT
-      store.id,
-      store.title,
-      store.lat,
-      store.lng,
-      store.address,
+      store.*,
       (6371 * acos(
       cos(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
       cos(${latitude} * 3.141592653589793 / 180.0) *
