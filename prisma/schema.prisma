@@ -37,6 +37,8 @@ model Product {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
   orderIds      Order[]
+  isSoldout     Boolean   @default(false)
+  isEnd         Boolean?
 
   @@map("product")
 }
@@ -72,8 +74,8 @@ model Order {
   products      Product[]
   user          User      @relation(fields: [userId], references: [id])
   userId        Int
-  totalQuantity Int       
-  totalDiscount Float     
+  totalQuantity Int
+  totalDiscount Float
 
   @@map("order")
 }
