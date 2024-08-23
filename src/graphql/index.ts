@@ -219,6 +219,13 @@ export const typeDefs = `
   type Query {
     orders: [Order!]!
     order(id: Int!): Order
-    compareOrderAmount(orderId: String!, amount: Float!, paymentKey: String!): CompareOrderAmountResult! 
+    compareOrderAmount(orderId: String!, amount: Float!, paymentKey: String!, cartItems: [CartItem]): CompareOrderAmountResult! 
+  }
+  input CartItem {
+    product: ProductInput
+    quantity: Int!
+  }
+  input ProductInput {
+    id: Int!
   }
 `;

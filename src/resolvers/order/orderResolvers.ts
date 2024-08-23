@@ -24,9 +24,13 @@ export const orderResolvers = {
         include: { products: true },
       });
     },
-    compareOrderAmount: async (_, { orderId, amount, paymentKey }) => {
+    compareOrderAmount: async (
+      _,
+      { orderId, amount, paymentKey, cartItems }
+    ) => {
       const order = await prisma.order.findUnique({
         where: { orderId },
+        include: { products: true },
       });
 
       if (!order) {
@@ -58,6 +62,26 @@ export const orderResolvers = {
           if (response.ok) {
             // 결제 성공 비즈니스 로직을 구현하세요.
             console.log("승인완료 🤩");
+            await prisma.order.update({
+              where: { orderId },
+              data: { isApproved: true },
+            });
+
+            cartItems.map(async (cartItem) => {
+              const existproduct = await prisma.product.findUnique({
+                where: { id: cartItem.product.id },
+              });
+              const left = existproduct.quantity - cartItem.quantity;
+              const isSoldout = left <= 0;
+
+              await prisma.product.update({
+                where: { id: existproduct.id },
+                data: {
+                  quantity: left,
+                  isSoldout,
+                },
+              });
+            });
             return {
               ok: true,
               error: null,
