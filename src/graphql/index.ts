@@ -40,6 +40,8 @@ export const typeDefs = `
     createdAt: DateTime!
     updatedAt: DateTime!
     img: String
+    isSoldout: Boolean
+    isEnd: Boolean
   }
 
   type Query {
@@ -188,6 +190,7 @@ export const typeDefs = `
     updatedAt: DateTime
     totalQuantity: Int!
     totalDiscount: Float! 
+    isApproved: Boolean
   }
   input CreateOrderInput {
     orderId: String!
