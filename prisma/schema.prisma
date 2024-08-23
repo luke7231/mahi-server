@@ -76,6 +76,7 @@ model Order {
   userId        Int
   totalQuantity Int
   totalDiscount Float
+  isApproved    Boolean   @default(false)
 
   @@map("order")
 }
