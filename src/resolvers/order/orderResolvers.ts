@@ -11,6 +11,7 @@ export const orderResolvers = {
       const orders = await prisma.order.findMany({
         where: {
           userId: user.id,
+          isApproved: true,
         },
         include: { products: true },
         orderBy: { createdAt: "desc" },
@@ -43,6 +44,24 @@ export const orderResolvers = {
 
       async function confirmPayment() {
         try {
+          let canGo = true;
+          let ranoutProduct;
+          // 마지막으로 수량 체크해야함. 누군가 db 변경했을 수도 있잖.
+          cartItems.forEach(async (cartItem) => {
+            const existproduct = await prisma.product.findUnique({
+              // 다시 조회
+              where: { id: cartItem.product.id },
+            });
+            console.log("개수: ", existproduct.quantity);
+            console.log("사려고하는 거 개수:", cartItem.quantity);
+            if (existproduct.quantity < cartItem.quantity) {
+              // db에 남은 개수 < 사려고하는 수량.
+              throw new Error(
+                `죄송합니다. [${ranoutProduct.name}] 제품의 재고가 부족합니다.`
+              );
+            }
+          });
+
           const response = await fetch(
             "https://api.tosspayments.com/v1/payments/confirm",
             {
