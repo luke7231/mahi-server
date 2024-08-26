@@ -9,6 +9,7 @@ export const typeDefs = `
     likes: [Like!]
     isLiked: Boolean
     products: [Product!]
+    address: String
     img: String
   }
 
