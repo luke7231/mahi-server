@@ -3,7 +3,7 @@ import { prisma } from "../index.js";
 
 export const storeResolvers = {
   Query: {
-    store: async (_, { id }) => {
+    store: async (_, { id }, { user }) => {
       try {
         const store = await prisma.store.findUnique({
           where: { id: id },
@@ -11,7 +11,21 @@ export const storeResolvers = {
         if (!store) {
           throw new Error("Store not found");
         }
-        return store;
+        if (!user) return store;
+
+        const likes = await prisma.like.findMany({
+          where: { userId: user.id },
+        });
+
+        const likeIds = likes.map((like) => like.storeId);
+        const set = new Set(likeIds);
+
+        // 단일 객체에 대해 isLiked 속성을 추가
+        const updatedStore = {
+          ...store,
+          isLiked: set.has(store.id),
+        };
+        return updatedStore;
       } catch (error) {
         throw new Error("Error fetching store");
       }
