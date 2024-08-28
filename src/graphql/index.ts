@@ -11,6 +11,8 @@ export const typeDefs = `
     products: [Product!]
     address: String
     img: String
+    contactNumber: String
+    closingHours: String
   }
 
   type Query {

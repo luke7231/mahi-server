@@ -8,17 +8,19 @@ datasource db {
 }
 
 model Store {
-  id        Int       @id @default(autoincrement())
-  title     String
-  lat       Float
-  lng       Float
-  img       String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  address   String?
-  owner     String?
-  likes     Like[]
-  products  Product[] // Store와 Product의 관계 설정
+  id            Int       @id @default(autoincrement())
+  title         String
+  lat           Float
+  lng           Float
+  img           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  address       String?
+  owner         String?
+  contactNumber String?
+  closingHours  String?
+  likes         Like[]
+  products      Product[] // Store와 Product의 관계 설정
 
   @@map("store")
 }
