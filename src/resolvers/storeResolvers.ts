@@ -43,18 +43,22 @@ export const storeResolvers = {
       // TODO: 필터에 따라 다르게 가야함. (가격순, 거리순, 추천순 등등)
       // ToDO: 페이지 네이션 (무한 스크롤)
       const storesWithDistance = await prisma.$queryRaw`
-      SELECT
-      store.*,
-      (6371 * acos(
-      cos(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
-      cos(${latitude} * 3.141592653589793 / 180.0) *
-      cos((${longitude} * 3.141592653589793 / 180.0) - (CAST(store.lng AS FLOAT) * 3.141592653589793 / 180.0)) +
-      sin(CAST(store.lat  AS FLOAT) * 3.141592653589793 / 180.0) *
-      sin(${latitude} * 3.141592653589793 / 180.0)
-      )) as distance
-      FROM store
+      SELECT *
+      FROM (
+          SELECT
+          store.*,
+          (6371 * acos(
+          cos(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
+          cos(${latitude} * 3.141592653589793 / 180.0) *
+          cos((${longitude} * 3.141592653589793 / 180.0) - (CAST(store.lng AS FLOAT) * 3.141592653589793 / 180.0)) +
+          sin(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
+          sin(${latitude} * 3.141592653589793 / 180.0)
+          )) as distance
+          FROM store
+      ) as stores_with_distance
+      WHERE distance <= 5
       ORDER BY distance ASC;
-      `;
+`;
 
       if (!user) return storesWithDistance;
       const likes = await prisma.like.findMany({
