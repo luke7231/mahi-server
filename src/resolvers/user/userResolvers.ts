@@ -17,6 +17,106 @@ interface Context {
 }
 export const userResolvers = {
   Query: {
+    getLocalAddress: async (_, { lat, lng, push_token }) => {
+      const getAddressFromCoords = async ({
+        lngInput,
+        latInput,
+      }: // expo push token
+      {
+        lngInput: number;
+        latInput: number;
+      }) => {
+        // [docs]: https://api.ncloud-docs.com/docs/ai-naver-mapsreversegeocoding-gc#%EC%98%A4%EB%A5%98-%EC%BD%94%EB%93%9C
+        const url =
+          "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc";
+        const coords = `${lngInput},${latInput}`; // 좌표 객체를 문자열로 변환
+        const params = {
+          request: "coordsToaddr",
+          coords: coords,
+          sourcecrs: "epsg:4326",
+          output: "json",
+          orders: "roadaddr,legalcode",
+        };
+        console.log(lat, lng);
+        try {
+          const response = await axios.get(url, {
+            headers: {
+              "X-NCP-APIGW-API-KEY-ID": process.env.NAVER_CLIENT_ID,
+              "X-NCP-APIGW-API-KEY": process.env.NAVER_CLIENT_SECRET,
+            },
+            params: params,
+          });
+          // throw new Error("just");
+          return response.data;
+        } catch (error) {
+          throw new Error(error);
+        }
+      };
+
+      // console.log(res.results[1]);
+      // 1.  expo token findUnique
+      // 2.  update -> area1,2,3,4
+      // const getCoordsFromAddress = async ({ query }) => {
+      //   const url =
+      //     "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode";
+
+      //   try {
+      //     const response = await axios.get(url, {
+      //       headers: {
+      //         "X-NCP-APIGW-API-KEY-ID": process.env.NAVER_CLIENT_ID,
+      //         "X-NCP-APIGW-API-KEY": process.env.NAVER_CLIENT_SECRET,
+      //       },
+      //       params: {
+      //         query: query,
+      //       },
+      //     });
+      //     return response.data;
+      //   } catch (error) {
+      //     console.error("Error:", error);
+      //     throw error; // 에러 발생 시 에러를 던집니다.
+      //   }
+      // };
+      const res = await getAddressFromCoords({ latInput: lat, lngInput: lng });
+      console.log(res);
+      console.log("res.results[0]: ", res.results[0]);
+
+      const makeLoadAddr = (data) => {
+        // const roadAddr = data.land.name; // 도로명
+        // const roadNumber = data.land.number1;
+        const region = [
+          data.region.area1.name, // 시도
+          data.region.area2.name, // 시군구
+          data.region.area3.name, // 동읍면
+          data.region.area4.name, // 상세주소
+        ]
+          .filter(Boolean)
+          .join(" "); // 빈 값 제거 후 조합
+
+        // 도로명 주소와 지역을 조합
+        return `${region}`.trim();
+      };
+      const loadAddr = makeLoadAddr(res.results[0]);
+      console.log(loadAddr);
+
+      if (push_token) {
+        const { area1, area2, area3, area4 } = res.results[0].region;
+        const existingExpoToken = await prisma.expo_Token.update({
+          where: { token: push_token },
+          data: {
+            area1: area1.name,
+            area2: area2.name,
+            area3: area3.name,
+            area4: area4.name,
+          },
+        });
+        console.log(existingExpoToken);
+      }
+      // const res2 = await getCoordsFromAddress({
+      //   query: "성남시 수정구 복정로 66",
+      // });
+      // console.log(res2);
+      return loadAddr;
+    },
     kakaoLogin: async (_, { code, client_id, redirect_url, push_token }) => {
       try {
         const postUrl = "https://kauth.kakao.com/oauth/token";

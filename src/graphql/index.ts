@@ -96,6 +96,7 @@ export const typeDefs = `
   }
 
   type Query {
+    getLocalAddress(lat: Float!, lng: Float!, push_token: String): String!
         users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
