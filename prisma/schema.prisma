@@ -21,6 +21,10 @@ model Store {
   closingHours  String?
   likes         Like[]
   products      Product[] // Store와 Product의 관계 설정
+  area1         String    @default("")
+  area2         String    @default("")
+  area3         String    @default("")
+  area4         String    @default("")
 
   @@map("store")
 }
@@ -99,6 +103,10 @@ model Like {
 model Expo_Token {
   token     String   @unique
   createdAt DateTime @default(now())
+  area1     String   @default("")
+  area2     String   @default("")
+  area3     String   @default("")
+  area4     String   @default("")
 
   @@map("expo_Token")
 }
