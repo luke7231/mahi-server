@@ -34,6 +34,21 @@ export const productResolvers = {
         if (likedUserTokens.length !== 0) {
           sendPushNotification(likedUserTokens, message, data);
         }
+        const 동주민 = await prisma.expo_Token.findMany({
+          where: {
+            area1: store.area1,
+            area2: store.area2,
+            area3: store.area3,
+            area4: store.area4,
+          },
+        });
+
+        const tokens = 동주민.map((주민) => 주민.token);
+        const message2 = `${store.area3}에 새로운 재고가 올라왔어요!🎉`;
+        const data2 = { storeId: store.id };
+        if (tokens.length !== 0) {
+          sendPushNotification(tokens, message2, data2);
+        }
       }
 
       return newProduct;
