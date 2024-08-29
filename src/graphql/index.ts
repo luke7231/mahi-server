@@ -18,6 +18,7 @@ export const typeDefs = `
   type Query {
     store(id: Int!): Store
     stores(lat: Float, lng: Float): [Store]
+    justStores: [Store]
     likedStores: [Store!]
   }
 
@@ -95,7 +96,7 @@ export const typeDefs = `
   }
 
   type Query {
-    users: [User!]!
+        users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
     appleLogin(id_token: String!, push_token: String): appleLoginResult!

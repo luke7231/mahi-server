@@ -31,6 +31,25 @@ export const storeResolvers = {
       }
     },
     //고도화
+    justStores: async (_, __, { user }) => {
+      const stores = await prisma.store.findMany();
+      console.log(user);
+      if (!user) return stores;
+      const likes = await prisma.like.findMany({
+        where: { userId: user.id },
+      });
+      const likeIds = likes.map((like) => like.storeId);
+      const set = new Set(likeIds);
+
+      let newArray = (stores as Array<Store>).map((item) => {
+        // user.id가 bSet에 포함되어 있으면 user.isLiked를 true로 설정
+        return {
+          ...item,
+          isLiked: set.has(item.id),
+        };
+      });
+      return newArray;
+    },
     stores: async (
       _,
       { lat, lng }: { lat?: number; lng?: number },
