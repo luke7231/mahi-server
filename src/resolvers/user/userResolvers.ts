@@ -438,6 +438,44 @@ export const userResolvers = {
 
       return { ok: true, error: null };
     },
+    updateUserPassword: async (_, { data }, context) => {
+      try {
+        const { oldPassword, newPassword } = data;
+        console.log(data);
+        console.log(context);
+        // Ensure the user is authenticated
+        if (!context.user) {
+          throw new Error("You must be logged in to update your password.");
+        }
+
+        const userId = context.user.id;
+
+        // Find the user in the database
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+
+        if (!user) {
+          throw new Error("User not found.");
+        }
+
+        // Check if the old password matches
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+          throw new Error("기존 비밀번호가 일치하지 않습니다.");
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the user with the new password
+        const updatedUser = await prisma.user.update({
+          where: { id: userId },
+          data: { password: hashedPassword },
+        });
+        return updatedUser;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
   },
   User: {
     likes: async (parent) => {
