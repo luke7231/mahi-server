@@ -103,12 +103,16 @@ export const typeDefs = `
   type Mutation {
     createUser(data: CreateUserInput!): User!
     updateUser(id: Int!, data: UpdateUserInput!): User!
-    updateUserPassword(data: UpdatePasswordInput!): User!
+    updateUserPassword(oldPassword: String!, newPassword: String!): updateUserPasswordResult!
     kakaoDeleteUser: kakaoDeleteResult
     appleDeleteUser(code: String!): appleDeleteResult
     pureSignup(email:String!, password: String!, push_token: String): pureSignResult
     pureLogin(email:String!, password: String!): pureSignResult
     pureDeleteUser: pureDeleteUserResult
+  }
+  type updateUserPasswordResult{ 
+    ok: Boolean!
+    error: String
   }
   input CreateUserInput {
     name: String!
@@ -120,10 +124,7 @@ export const typeDefs = `
     address: String
     push_token: String
   }
-  input UpdatePasswordInput {
-    oldPassword: String!
-    newPassword: String!
-  }
+
   input UpdateUserInput {
     name: String
     email: String

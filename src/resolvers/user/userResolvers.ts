@@ -438,27 +438,29 @@ export const userResolvers = {
 
       return { ok: true, error: null };
     },
-    updateUserPassword: async (_, { data }, context) => {
+    updateUserPassword: async (_, { oldPassword, newPassword }, { user }) => {
       try {
-        const { oldPassword, newPassword } = data;
-        console.log(data);
-        console.log(context);
         // Ensure the user is authenticated
-        if (!context.user) {
+        if (!user) {
           throw new Error("You must be logged in to update your password.");
         }
 
-        const userId = context.user.id;
+        const userId = user.id;
 
         // Find the user in the database
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const existingUser = await prisma.user.findUnique({
+          where: { id: userId },
+        });
 
         if (!user) {
           throw new Error("User not found.");
         }
 
         // Check if the old password matches
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        const isMatch = await bcrypt.compare(
+          oldPassword,
+          existingUser.password
+        );
         if (!isMatch) {
           throw new Error("기존 비밀번호가 일치하지 않습니다.");
         }
@@ -468,12 +470,12 @@ export const userResolvers = {
 
         // Update the user with the new password
         const updatedUser = await prisma.user.update({
-          where: { id: userId },
+          where: { id: existingUser.id },
           data: { password: hashedPassword },
         });
-        return updatedUser;
+        return { ok: true, error: null };
       } catch (e) {
-        throw new Error(e);
+        return { ok: false, error: e };
       }
     },
   },

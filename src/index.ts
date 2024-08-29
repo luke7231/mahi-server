@@ -41,7 +41,7 @@ await server.start();
 // and our expressMiddleware function.
 app.use(
   "/",
-  cors<cors.CorsRequest>(),
+  cors<cors.CorsRequest>({ origin: "*" }),
   express.json(),
   // expressMiddleware accepts the same arguments:
   // an Apollo Server instance and optional configuration options
