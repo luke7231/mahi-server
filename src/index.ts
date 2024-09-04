@@ -12,6 +12,7 @@ import { typeDefs } from "./graphql/index.js";
 import { resolvers } from "./resolvers/index.js";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import bodyParser from "body-parser";
 
 interface MyContext {
   token?: string;
@@ -35,7 +36,30 @@ const server = new ApolloServer<MyContext>({
   introspection: true,
 });
 // Ensure we wait for our server to start
-await server.start();
+await server.start().then((res) => {
+  // app.use(bodyParser.json()); // JSON 형식의 본문 파싱
+  // app.use(bodyParser.urlencoded({ extended: true })); // URL-encoded 형식의 본문 파싱
+  // /nice-auth 엔드포인트 설정
+  // app.post("/nice-auth", (req, res) => {
+  //   const paymentResult = req.body;
+  //   console.log("결제 결과:", paymentResult); // 결제 결과 로그 출력
+  //   // const isSuccess = paymentResult.PCD_PAY_CODE === "0000";
+  //   const message = paymentResult.authResultMsg;
+  //   // const transactionId = paymentResult.transactionId || "unknown";
+  //   // 결제 결과를 쿼리 문자열로 포함하여 리디렉션
+  //   res.redirect(`${process.env.NICE_AUTH_REDIRECT_URL}?status=${message}`);
+  // });
+  // app.post("/payple-auth", (req, res) => {
+  //   const paymentResult = req.body;
+  //   console.log("결제 결과:", paymentResult); // 결제 결과 로그 출력
+  //   // 클라이언트 측의 특정 URL로 리디렉션
+  //   // const isSuccess = paymentResult.PCD_PAY_CODE === "0000";
+  //   const message = paymentResult.PCD_PAY_MSG;
+  //   // const transactionId = paymentResult.transactionId || "unknown";
+  //   // 결제 결과를 쿼리 문자열로 포함하여 리디렉션
+  //   res.redirect(`${process.env.NICE_AUTH_REDIRECT_URL}/nice-result?status=${message}`);
+  // });
+});
 
 // Set up our Express middleware to handle CORS, body parsing,
 // and our expressMiddleware function.
