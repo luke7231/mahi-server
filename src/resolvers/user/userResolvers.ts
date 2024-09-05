@@ -555,6 +555,9 @@ export const userResolvers = {
         if (!user) {
           throw new Error("User not found.");
         }
+        if (existingUser.kakaoId || existingUser.appleId) {
+          throw new Error("소셜로그인으로 가입된 계정입니다.");
+        }
 
         // Check if the old password matches
         const isMatch = await bcrypt.compare(
