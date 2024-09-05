@@ -33,7 +33,6 @@ export const storeResolvers = {
     //고도화
     justStores: async (_, __, { user }) => {
       const stores = await prisma.store.findMany();
-      console.log(user);
       if (!user) return stores;
       const likes = await prisma.like.findMany({
         where: { userId: user.id },
