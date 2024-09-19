@@ -25,6 +25,8 @@ model Store {
   area2         String    @default("")
   area3         String    @default("")
   area4         String    @default("")
+  Seller        Seller[]
+  menus         Menu[]
 
   @@map("store")
 }
@@ -109,4 +111,30 @@ model Expo_Token {
   area4     String   @default("")
 
   @@map("expo_Token")
+}
+
+model Seller {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password      String
+  contactNumber String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  store   Store? @relation(fields: [storeId], references: [id])
+  storeId Int? // Store와 일대일 관계 설정
+}
+
+model Menu {
+  id      Int     @id @default(autoincrement())
+  name    String
+  price   Float
+  img     String?
+  store   Store   @relation(fields: [storeId], references: [id])
+  storeId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

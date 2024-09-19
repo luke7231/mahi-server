@@ -239,4 +239,52 @@ export const typeDefs = `
   input ProductInput {
     id: Int!
   }
+
+
+
+  type Seller {
+    id: Int!
+    name: String!
+    email: String!
+    contactNumber: String
+    address: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    stores: [Store!]
+  }
+  
+  type Query {
+    seller(id: Int!): Seller
+    sellers: [Seller!]!
+  }
+  
+  type Mutation {
+    createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): Seller!
+    updateSeller(id: Int!, name: String, email: String, contactNumber: String, address: String): Seller!
+    deleteSeller(id: Int!): Seller!
+  }
+  
+
+  
+  type Menu {
+    id: Int!
+    name: String!
+    price: Float!
+    img: String
+    store: Store!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+  
+  type Query {
+    menu(id: Int!): Menu
+    menus(storeId: Int!): [Menu!]!
+  }
+  
+  type Mutation {
+    createMenu(storeId: Int!, name: String!, price: Float!, img: String): Menu!
+    updateMenu(id: Int!, name: String, price: Float, img: String): Menu!
+    deleteMenu(id: Int!): Menu!
+  }
+  
 `;
