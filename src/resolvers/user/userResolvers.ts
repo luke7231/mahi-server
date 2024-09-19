@@ -170,6 +170,11 @@ export const userResolvers = {
           const userInfo = await requestUserInfo(accessToken);
           if (userInfo.id) {
             const kakaoEmail = userInfo.kakao_account.email;
+            if (!kakaoEmail) {
+              throw new Error(
+                "카카오 내 인증된 이메일이 없으면 사용하실 수 없습니다."
+              );
+            }
             // 키카오 이메일로 서비스 db 조회
             let user = await prisma.user.findUnique({
               where: {
