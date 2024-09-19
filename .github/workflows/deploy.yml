@@ -1,0 +1,65 @@
+name: Deploy to cloudtype
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Deploy
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: tmddnjs7231/mahi-server
+          stage: main
+          yaml: >
+            name: mahi-server
+
+            app: node@20
+
+            options:
+              env:
+                - name: NODE_ENV
+                  value: production
+                - name: DATABASE_URL
+                  value: ${{ secrets.DATABASE_URL }}
+                - name: JWT_SECRET_KEY
+                  value: ${{ secrets.JWT_SECRET_KEY }}
+                - name: KAKAO_ADMIN_KEY
+                  value: ${{ secrets.KAKAO_ADMIN_KEY }}
+                - name: NAVER_CLIENT_ID
+                  value: ${{ secrets.NAVER_CLIENT_ID }}
+                - name: NAVER_CLIENT_SECRET
+                  value: ${{ secrets.NAVER_CLIENT_SECRET }}
+                - name: APPLE_SECRET_KEY
+                  value: ${{ secrets.APPLE_SECRET_KEY }}
+                - name: APPLE_TEAM_ID
+                  value: ${{ secrets.APPLE_TEAM_ID }}
+                - name: APPLE_KEY_ID
+                  value: ${{ secrets.APPLE_KEY_ID }}
+                - name: APPLE_REDIRECT_URI
+                  value: ${{ secrets.APPLE_REDIRECT_URI }}
+                - name: NICE_AUTH_REDIRECT_URL
+                  value: ${{ secrets.NICE_AUTH_REDIRECT_URL }}
+              ports: 4000
+              install: npm install
+              build: npm run build
+              start: node ./dist/index.js
+              buildenv: []
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
+              preset: express-graphql
