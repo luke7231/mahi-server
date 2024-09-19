@@ -9,3 +9,8 @@ export const generateToken = (user) => {
     expiresIn: "1y", // 토큰 유효 기간 설정
   });
 };
+export const generateSellerToken = (seller) => {
+  return jwt.sign({ id: seller.id }, SECRET_KEY, {
+    expiresIn: "1y", // 토큰 유효 기간 설정
+  });
+};

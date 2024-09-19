@@ -183,22 +183,56 @@ app.use(
   "/",
   cors<cors.CorsRequest>({ origin: "*" }),
   express.json(),
-  // expressMiddleware accepts the same arguments:
-  // an Apollo Server instance and optional configuration options
   expressMiddleware(server, {
     context: async ({ req }) => {
-      const token = req.headers.authorization || "";
+      const userToken = req.headers["authorization"] || ""; // 유저 토큰
+      const sellerToken = (req.headers["seller-authorization"] as string) || ""; // 셀러 토큰
 
-      if (token) {
+      let user = null;
+      let seller = null;
+
+      // 유저 토큰 검증
+      if (userToken) {
         try {
-          const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-          return { user: decoded }; // 유저 정보를 context에 추가
+          const decodedUser = jwt.verify(
+            userToken.replace("Bearer ", ""),
+            SECRET_KEY
+          );
+
+          user = await prisma.user.findUnique({
+            where: { id: decodedUser.id },
+          });
+
+          if (!user) {
+            throw new Error("User not found");
+          }
         } catch (err) {
-          throw new Error("Invalid/Expired token");
+          throw new Error("Invalid/Expired user token");
         }
       }
 
-      return {};
+      // 셀러 토큰 검증
+      if (sellerToken) {
+        try {
+          const decodedSeller = jwt.verify(
+            sellerToken.replace("Bearer ", ""),
+            SECRET_KEY
+          );
+
+          seller = await prisma.seller.findUnique({
+            where: { id: decodedSeller.id },
+          });
+
+          if (!seller) {
+            throw new Error("Seller not found");
+          }
+        } catch (err) {
+          throw new Error("Invalid/Expired seller token");
+        }
+      }
+
+      // user와 seller 모두 context에 저장
+      return { user, seller };
     },
   })
 );

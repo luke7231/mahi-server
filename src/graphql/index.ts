@@ -261,10 +261,19 @@ export const typeDefs = `
   type Mutation {
     createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): Seller!
     updateSeller(id: Int!, name: String, email: String, contactNumber: String, address: String): Seller!
+    updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
+    sellerLogin(email: String!, password: String!): sellerLoginResult!
+  }
+  type updateSellerPasswordResult {
+    ok: Boolean!
+    error: String
+  }
+  type sellerLoginResult {
+    token: String
+    error: String
   }
   
-
   
   type Menu {
     id: Int!
