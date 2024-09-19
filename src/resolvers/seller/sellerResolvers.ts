@@ -3,12 +3,12 @@ import { generateSellerToken } from "../../lib/jwt-token.js";
 
 export const sellerResolvers = {
   Query: {
-    seller: async (_, { id }) => {
-      const seller = await prisma.seller.findUnique({
-        where: { id },
+    seller: async (_, __, { seller }) => {
+      const dbSeller = await prisma.seller.findUnique({
+        where: { id: seller.id },
         include: { store: true }, // stores 필드를 포함해서 조회
       });
-      return seller;
+      return dbSeller;
     },
     sellers: async () => {
       const sellers = await prisma.seller.findMany({
@@ -50,9 +50,13 @@ export const sellerResolvers = {
         token, // 클라이언트에 토큰 반환
       };
     },
-    updateSeller: async (_, { id, name, email, contactNumber, address }) => {
+    updateSeller: async (
+      _,
+      { name, email, contactNumber, address },
+      { seller }
+    ) => {
       const updatedSeller = await prisma.seller.update({
-        where: { id },
+        where: { id: seller.id },
         data: {
           name,
           email,

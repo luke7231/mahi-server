@@ -254,13 +254,13 @@ export const typeDefs = `
   }
   
   type Query {
-    seller(id: Int!): Seller
+    seller: Seller
     sellers: [Seller!]!
   }
   
   type Mutation {
     createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): createSellerResult!
-    updateSeller(id: Int!, name: String, email: String, contactNumber: String, address: String): Seller!
+    updateSeller(name: String, email: String, contactNumber: String, address: String): Seller!
     updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
     sellerLogin(email: String!, password: String!): sellerLoginResult!
