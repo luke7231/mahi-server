@@ -259,7 +259,7 @@ export const typeDefs = `
   }
   
   type Mutation {
-    createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): Seller!
+    createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): createSellerResult!
     updateSeller(id: Int!, name: String, email: String, contactNumber: String, address: String): Seller!
     updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
@@ -272,6 +272,10 @@ export const typeDefs = `
   type sellerLoginResult {
     token: String
     error: String
+  }
+  type createSellerResult {
+    seller: Seller!
+    token: String!
   }
   
   

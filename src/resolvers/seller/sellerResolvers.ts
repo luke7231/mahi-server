@@ -41,7 +41,14 @@ export const sellerResolvers = {
           address,
         },
       });
-      return newSeller;
+
+      // 토큰 발행
+      const token = generateSellerToken(newSeller);
+
+      return {
+        seller: newSeller,
+        token, // 클라이언트에 토큰 반환
+      };
     },
     updateSeller: async (_, { id, name, email, contactNumber, address }) => {
       const updatedSeller = await prisma.seller.update({
