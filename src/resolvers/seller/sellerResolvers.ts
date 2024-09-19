@@ -22,6 +22,16 @@ export const sellerResolvers = {
       _,
       { name, email, password, contactNumber, address }
     ) => {
+      // 중복 이메일 체크
+      const existingSeller = await prisma.seller.findUnique({
+        where: { email },
+      });
+
+      if (existingSeller) {
+        throw new Error("이미 존재하는 이메일입니다.");
+      }
+
+      // Seller 생성
       const newSeller = await prisma.seller.create({
         data: {
           name,
