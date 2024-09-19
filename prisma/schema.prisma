@@ -125,6 +125,8 @@ model Seller {
 
   store   Store? @relation(fields: [storeId], references: [id])
   storeId Int? // Store와 일대일 관계 설정
+
+   @@map("seller")
 }
 
 model Menu {
@@ -137,4 +139,6 @@ model Menu {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+   @@map("menu")
 }
