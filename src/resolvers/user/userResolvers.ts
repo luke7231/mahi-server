@@ -56,26 +56,7 @@ export const userResolvers = {
       // console.log(res.results[1]);
       // 1.  expo token findUnique
       // 2.  update -> area1,2,3,4
-      // const getCoordsFromAddress = async ({ query }) => {
-      //   const url =
-      //     "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode";
 
-      //   try {
-      //     const response = await axios.get(url, {
-      //       headers: {
-      //         "X-NCP-APIGW-API-KEY-ID": process.env.NAVER_CLIENT_ID,
-      //         "X-NCP-APIGW-API-KEY": process.env.NAVER_CLIENT_SECRET,
-      //       },
-      //       params: {
-      //         query: query,
-      //       },
-      //     });
-      //     return response.data;
-      //   } catch (error) {
-      //     console.error("Error:", error);
-      //     throw error; // 에러 발생 시 에러를 던집니다.
-      //   }
-      // };
       const res = await getAddressFromCoords({ latInput: lat, lngInput: lng });
       console.log(res);
       console.log("res.results[0]: ", res.results[0]);
