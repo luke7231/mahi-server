@@ -1,4 +1,5 @@
 export const typeDefs = `
+scalar Upload
   type Store {
     id: Int!
     lat: Float
@@ -20,10 +21,20 @@ export const typeDefs = `
     stores(lat: Float, lng: Float): [Store]
     justStores: [Store]
     likedStores: [Store!]
+    getSellerStore: Store
   }
 
   type Mutation {
-    createStore(lat: Float, lng: Float, title: String!): CreateStoreResponse
+    createStore(
+      lat: Float, 
+      lng: Float, 
+      title: String!, 
+      address: String, 
+      contactNumber: String, 
+      closingHours: String, 
+      img: Upload
+    ): CreateStoreResponse
+    updateStore(id: Int!, title: String, lat: Float, lng: Float, address: String, contactNumber: String, closingHours: String, img: Upload): Store!
   }
 
   type CreateStoreResponse {
@@ -300,4 +311,12 @@ export const typeDefs = `
     deleteMenu(id: Int!): Menu!
   }
   
+  type Query {
+    getCoords(address: String!): CoordsResponse
+  }
+
+  type CoordsResponse {
+    lng: Float!
+    lat: Float! 
+  }
 `;
