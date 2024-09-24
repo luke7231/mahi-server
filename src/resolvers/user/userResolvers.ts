@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import * as qs from "querystring";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { getCoordsFromAddress } from "../../lib/location/index.js";
 dotenv.config();
 
 const KAKAO_UNLINK_URL = "https://kapi.kakao.com/v1/user/unlink";
@@ -17,6 +18,16 @@ interface Context {
 }
 export const userResolvers = {
   Query: {
+    getCoords: async (_, { address }) => {
+      const geoCode = await getCoordsFromAddress({ query: address });
+      const lat = parseFloat(geoCode.addresses[0]?.y) || 0; // 위도
+      const lng = parseFloat(geoCode.addresses[0]?.x) || 0; // 경도
+
+      return {
+        lat,
+        lng,
+      };
+    },
     getLocalAddress: async (_, { lat, lng, push_token }) => {
       const getAddressFromCoords = async ({
         lngInput,
