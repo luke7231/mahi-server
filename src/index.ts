@@ -14,6 +14,7 @@ import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import { AuthResponse } from "./types.js";
 import axios from "axios";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
 interface MyContext {
   token?: string;
@@ -41,6 +42,8 @@ await server.start().then(async (res) => {
   // const order = await prisma.order.findUnique()
   app.use(bodyParser.json()); // JSON 형식의 본문 파싱
   app.use(bodyParser.urlencoded({ extended: true })); // URL-encoded 형식의 본문 파싱
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
+
   // /nice-auth 엔드포인트 설정
   app.post("/nice-auth", async (req, res) => {
     // throw new Error("그냥 에러요~");
@@ -181,7 +184,11 @@ await server.start().then(async (res) => {
 // and our expressMiddleware function.
 app.use(
   "/",
-  cors<cors.CorsRequest>({ origin: "*" }),
+  cors<cors.CorsRequest>({
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    origin: "*",
+  }),
   express.json(),
   expressMiddleware(server, {
     context: async ({ req }) => {

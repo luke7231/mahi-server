@@ -6,8 +6,10 @@ import { productResolvers } from "./product/productResolvers.js";
 import { orderResolvers } from "./order/orderResolvers.js";
 import { sellerResolvers } from "./seller/sellerResolvers.js";
 import { menuResolvers } from "./menu/menuResolvers.js";
+import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 
 export const resolvers = {
+  Upload: GraphQLUpload, // Upload 타입 정의
   Query: {
     ...storeResolvers.Query,
     ...userResolvers.Query,
