@@ -16,7 +16,7 @@ export const orderResolvers = {
         include: { products: true },
         orderBy: { createdAt: "desc" },
       });
-      console.log(orders);
+
       return orders;
     },
     order: async (_, { id }) => {
