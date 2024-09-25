@@ -57,6 +57,13 @@ scalar Upload
     img: String
     isSoldout: Boolean
     isEnd: Boolean
+    menus: [MenuQuantity!]
+  }
+
+  type MenuQuantity {
+    menuId: Int!
+    quantity: Int!
+    img: String
   }
 
   type Query {
@@ -69,14 +76,22 @@ scalar Upload
     updateProduct(input: UpdateProductInput!): Product!
     deleteProduct(id: Int!): Product!
   }
+  
   input CreateProductInput {
-    storeId: Int!
+    menus: [MenuQuantityInput!]  # 메뉴 ID와 수량을 함께 받는 구조
     name: String!
     price: Float!
     discountPrice: Float
     quantity: Int!
     description: String
     saleEndTime: DateTime
+    img: Upload
+  }
+  
+  input MenuQuantityInput {
+    menuId: Int!
+    quantity: Int!
+    img: String
   }
 
   input UpdateProductInput {

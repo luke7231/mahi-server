@@ -1,5 +1,6 @@
 import { prisma } from "../../index.js";
 import { sendPushNotification } from "../../lib/expo-token.js";
+import { uploadToS3 } from "../../lib/file/index.js";
 
 export const productResolvers = {
   Query: {
@@ -10,17 +11,61 @@ export const productResolvers = {
   },
   Mutation: {
     // 푸시알람 가즈아
-    createProduct: async (_, { input }) => {
+    createProduct: async (_, { input }, { seller }) => {
+      const existSeller = await prisma.seller.findUnique({
+        where: {
+          id: seller.id,
+        },
+      });
+      const {
+        menus,
+        name,
+        price,
+        discountPrice,
+        description,
+        quantity,
+        saleEndTime,
+        img,
+      } = input;
+
+      let imageUrl = null;
+
+      // 이미지 파일이 존재하면 S3에 업로드
+      if (img) {
+        imageUrl = await uploadToS3(img, "product-banner");
+      }
+
       const newProduct = await prisma.product.create({
-        data: input,
+        data: {
+          store: { connect: { id: existSeller.storeId } }, // store 연결
+          name,
+          price,
+          discountPrice,
+          description,
+          saleEndTime,
+          menus: menus
+            ? {
+                create: menus.map((menu) => ({
+                  menu: { connect: { id: menu.menuId } }, // 각 메뉴와 연결
+                  quantity: menu.quantity, // 각 메뉴의 수량 저장
+                  img: menu.img || null, // img 필드 처리
+                })),
+              }
+            : {},
+          img: imageUrl,
+          quantity,
+        },
+        include: {
+          menus: true, // 연결된 메뉴와의 관계도 가져오도록 include
+        },
       });
 
       if (newProduct) {
         const store = await prisma.store.findUnique({
-          where: { id: input.storeId },
+          where: { id: existSeller.storeId },
         });
         const likedUsers = await prisma.like.findMany({
-          where: { storeId: input.storeId },
+          where: { storeId: existSeller.storeId },
           include: { user: true },
         });
 
