@@ -306,8 +306,8 @@ scalar Upload
   }
   
   type Mutation {
-    createMenu(storeId: Int!, name: String!, price: Float!, img: String): Menu!
-    updateMenu(id: Int!, name: String, price: Float, img: String): Menu!
+    createMenu(storeId: Int!, name: String!, price: Float!, img: Upload): Menu!
+    updateMenu(id: Int!, name: String, price: Float, img: Upload): Menu!
     deleteMenu(id: Int!): Menu!
   }
   
