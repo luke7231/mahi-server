@@ -151,7 +151,8 @@ model ProductMenu {
   productId Int
   menu      Menu    @relation(fields: [menuId], references: [id])
   menuId    Int
-  quantity  Int // 추가된 수량 정보
+  quantity  Int     // 추가된 수량 정보
+  img       String? // 각 메뉴별 이미지 정보 추가
 
   @@map("productMenu")
 }
