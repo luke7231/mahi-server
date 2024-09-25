@@ -32,8 +32,8 @@ model Store {
 }
 
 model Product {
-  id            Int       @id @default(autoincrement())
-  store         Store     @relation(fields: [storeId], references: [id])
+  id            Int           @id @default(autoincrement())
+  store         Store         @relation(fields: [storeId], references: [id])
   storeId       Int
   name          String
   img           String?
@@ -42,11 +42,12 @@ model Product {
   quantity      Int
   description   String?
   saleEndTime   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
   orderIds      Order[]
-  isSoldout     Boolean   @default(false)
+  isSoldout     Boolean       @default(false)
   isEnd         Boolean?
+  menus         ProductMenu[] // 중간 테이블과 관계
 
   @@map("product")
 }
@@ -126,7 +127,7 @@ model Seller {
   store   Store? @relation(fields: [storeId], references: [id])
   storeId Int? // Store와 일대일 관계 설정
 
-   @@map("seller")
+  @@map("seller")
 }
 
 model Menu {
@@ -137,8 +138,20 @@ model Menu {
   store   Store   @relation(fields: [storeId], references: [id])
   storeId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @default(now()) @updatedAt
+  products  ProductMenu[] // 중간 테이블과 관계
 
-   @@map("menu")
+  @@map("menu")
+}
+
+model ProductMenu {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  menu      Menu    @relation(fields: [menuId], references: [id])
+  menuId    Int
+  quantity  Int // 추가된 수량 정보
+
+  @@map("productMenu")
 }
