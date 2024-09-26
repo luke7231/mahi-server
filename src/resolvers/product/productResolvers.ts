@@ -19,8 +19,15 @@ export const productResolvers = {
         where: {
           storeId: store.id,
         },
-        include: { order: true },
+        include: {
+          order: {
+            include: {
+              user: true, // order에 연결된 user 정보를 포함
+            },
+          },
+        },
       });
+
       return products;
     },
   },

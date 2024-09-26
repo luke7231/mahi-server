@@ -232,6 +232,7 @@ scalar Upload
     totalQuantity: Int!
     totalDiscount: Float! 
     isApproved: Boolean
+    user: User
   }
   input CreateOrderInput {
     orderId: String!
