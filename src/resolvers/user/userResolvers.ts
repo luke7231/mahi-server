@@ -162,6 +162,7 @@ export const userResolvers = {
           const userInfo = await requestUserInfo(accessToken);
           if (userInfo.id) {
             const kakaoEmail = userInfo.kakao_account.email;
+            const kakaoNickname = userInfo.kakao_account.profile.nickname;
             if (!kakaoEmail) {
               throw new Error(
                 "카카오 내 인증된 이메일이 없으면 사용하실 수 없습니다."
@@ -182,6 +183,7 @@ export const userResolvers = {
                   email: kakaoEmail,
                   kakaoId: userInfo.id,
                   push_token,
+                  name: kakaoNickname,
                 },
               });
               console.log("[kakaoLogin]newUser: ", user);
