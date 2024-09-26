@@ -8,6 +8,21 @@ export const productResolvers = {
       await prisma.product.findMany({ where: { storeId } }),
     product: async (_, { id }) =>
       await prisma.product.findUnique({ where: { id } }),
+    productsBySeller: async (_, args, { seller }) => {
+      const existSeller = await prisma.seller.findUnique({
+        where: { id: seller.id },
+      });
+      const store = await prisma.store.findUnique({
+        where: { id: existSeller.storeId },
+      });
+      const products = await prisma.product.findMany({
+        where: {
+          storeId: store.id,
+        },
+        include: { order: true },
+      });
+      return products;
+    },
   },
   Mutation: {
     // 푸시알람 가즈아
