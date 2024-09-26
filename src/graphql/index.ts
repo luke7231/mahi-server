@@ -58,6 +58,7 @@ scalar Upload
     isSoldout: Boolean
     isEnd: Boolean
     menus: [MenuQuantity!]
+    order: Order
   }
 
   type MenuQuantity {
@@ -69,6 +70,7 @@ scalar Upload
   type Query {
     products(storeId: Int!): [Product!]!
     product(id: Int!): Product
+    productsBySeller: [Product!]
   }
 
   type Mutation {
