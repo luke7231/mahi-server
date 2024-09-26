@@ -211,13 +211,12 @@ export const userResolvers = {
         throw new Error(e);
       }
     },
-    appleLogin: async (_, { id_token, push_token }) => {
+    appleLogin: async (_, { name, id_token, push_token }) => {
       const { sub, email: appleEmail } = (jwt.decode(id_token) ?? {}) as {
         sub: string;
         email: string;
       };
 
-      console.log("sub:", sub);
       if (sub) {
         // 토큰 해독이 잘 됐다면?
         // 유저를 찾는다.
@@ -234,6 +233,7 @@ export const userResolvers = {
               email: appleEmail,
               appleId: sub,
               push_token,
+              name,
             },
           });
           console.log("[appleLogin]newUser: ", user);
