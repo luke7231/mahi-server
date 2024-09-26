@@ -24,7 +24,7 @@ export const sellerResolvers = {
     ) => {
       // 중복 이메일 체크
       const existingSeller = await prisma.seller.findUnique({
-        where: { email },
+        where: { contactNumber },
       });
 
       if (existingSeller) {
@@ -103,10 +103,10 @@ export const sellerResolvers = {
       });
       return deletedSeller;
     },
-    sellerLogin: async (_, { email, password }) => {
+    sellerLogin: async (_, { contactNumber, password }) => {
       // 1. 이메일로 셀러 찾기
       const seller = await prisma.seller.findUnique({
-        where: { email },
+        where: { contactNumber },
       });
 
       if (!seller) {

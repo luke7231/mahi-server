@@ -275,8 +275,8 @@ scalar Upload
 
   type Seller {
     id: Int!
-    name: String!
-    email: String!
+    name: String
+    email: String
     contactNumber: String
     address: String
     createdAt: DateTime!
@@ -290,11 +290,11 @@ scalar Upload
   }
   
   type Mutation {
-    createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): createSellerResult!
+    createSeller(password: String!, contactNumber: String!): createSellerResult!
     updateSeller(name: String, email: String, contactNumber: String, address: String): Seller!
     updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
-    sellerLogin(email: String!, password: String!): sellerLoginResult!
+    sellerLogin(contactNumber: String!, password: String!): sellerLoginResult!
   }
   type updateSellerPasswordResult {
     ok: Boolean!
