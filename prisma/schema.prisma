@@ -39,6 +39,7 @@ model Product {
   img           String?
   price         Float
   discountPrice Float?
+  userPrice     Float?
   quantity      Int
   description   String?
   saleEndTime   DateTime?

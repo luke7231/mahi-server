@@ -49,6 +49,7 @@ scalar Upload
     name: String!
     price: Float!
     discountPrice: Float
+    userPrice: Float
     quantity: Int!
     description: String
     saleEndTime: DateTime
@@ -84,6 +85,7 @@ scalar Upload
     name: String!
     price: Float!
     discountPrice: Float
+    userPrice: Float
     quantity: Int!
     description: String
     saleEndTime: DateTime
