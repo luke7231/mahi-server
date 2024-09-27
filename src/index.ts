@@ -15,6 +15,7 @@ import bodyParser from "body-parser";
 import { AuthResponse } from "./types.js";
 import axios from "axios";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import { sendPushNotification } from "./lib/expo-token.js";
 
 interface MyContext {
   token?: string;
@@ -133,13 +134,16 @@ await server.start().then(async (res) => {
     axios
       .post(url, data, { headers })
       .then(async (response) => {
-        // success
+        // *********************************
+        // ****** 승인 API 호출 시작 ******
+        // *********************************
         if (response.data.resultCode === "0000") {
           await prisma.order.update({
             where: { orderId },
             data: { isApproved: true },
           });
 
+          // 재고 업데이트
           cartItems.map(async (cartItem) => {
             const existproduct = await prisma.product.findUnique({
               where: { id: cartItem.product.id },
@@ -155,8 +159,22 @@ await server.start().then(async (res) => {
               },
             });
           });
+
+          // 푸시 알림 전송
+          const storeId = order.products[0].storeId;
+          const store = await prisma.store.findUnique({
+            where: { id: storeId },
+            include: {
+              Seller: true,
+            },
+          });
+          const sellerPushToken = store.Seller[0].push_token;
+          if (sellerPushToken) {
+            const pushMessage = "결제가 발생했습니다💰!!";
+            sendPushNotification([sellerPushToken], pushMessage, {});
+          }
+
           const amount = response.data.amount;
-          console.log("complete");
           res.redirect(
             `${
               process.env.NICE_AUTH_REDIRECT_URL
