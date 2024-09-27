@@ -18,6 +18,7 @@ export const sellerResolvers = {
     },
   },
   Mutation: {
+    // TODO: *사장님께서 직접 회원가입을 하는 날이 오면 push_token args로 받아야함.*
     createSeller: async (
       _,
       { name, email, password, contactNumber, address }
@@ -103,14 +104,25 @@ export const sellerResolvers = {
       });
       return deletedSeller;
     },
-    sellerLogin: async (_, { contactNumber, password }) => {
-      // 1. 이메일로 셀러 찾기
+    sellerLogin: async (_, { contactNumber, password, push_token }) => {
+      // 1. 번호로 셀러 찾기
       const seller = await prisma.seller.findUnique({
         where: { contactNumber },
       });
 
       if (!seller) {
         return { error: "Seller not found" };
+      }
+
+      if (push_token && !seller.push_token) {
+        await prisma.seller.update({
+          where: {
+            contactNumber,
+          },
+          data: {
+            push_token,
+          },
+        });
       }
 
       // 2. 비밀번호 확인 (단순 비교, 필요시 bcrypt 사용 가능)

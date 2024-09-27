@@ -281,6 +281,7 @@ scalar Upload
     address: String
     createdAt: DateTime!
     updatedAt: DateTime!
+    push_token: String
     stores: [Store!]
   }
   
@@ -294,7 +295,7 @@ scalar Upload
     updateSeller(name: String, email: String, contactNumber: String, address: String): Seller!
     updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
-    sellerLogin(contactNumber: String!, password: String!): sellerLoginResult!
+    sellerLogin(contactNumber: String!, password: String!, push_token: String): sellerLoginResult!
   }
   type updateSellerPasswordResult {
     ok: Boolean!

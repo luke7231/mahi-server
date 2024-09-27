@@ -127,6 +127,8 @@ model Seller {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 
+  push_token    String?
+
   store   Store? @relation(fields: [storeId], references: [id])
   storeId Int? // Store와 일대일 관계 설정
 
