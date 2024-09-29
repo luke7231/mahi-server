@@ -109,8 +109,8 @@ await server.start().then(async (res) => {
     // ****** 승인 API 호출 시작 ******
     // *********************************
 
-    const clientKey = "S2_7edb63a062cd4f799d14caa983faab78";
-    const secretKey = "08b2d64dad344d1bae91f443d7c981af";
+    const clientKey = process.env.NICE_PAY_CLIENT_KEY;
+    const secretKey = process.env.NICE_PAY_SECRET_KEY;
 
     // Step 2: Combine clientKey and secretKey with a colon separator
     const credentials = `${clientKey}:${secretKey}`;
@@ -119,7 +119,7 @@ await server.start().then(async (res) => {
     const encodedCredentials = Buffer.from(credentials).toString("base64");
 
     // Prepare the URL and headers
-    const url = `https://sandbox-api.nicepay.co.kr/v1/payments/${tid}`;
+    const url = `https://api.nicepay.co.kr/v1/payments/${tid}`;
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Basic ${encodedCredentials}`,
@@ -189,6 +189,7 @@ await server.start().then(async (res) => {
       .catch((error) => {
         ok = "0";
         resCode = "500";
+        console.log(error);
         res.redirect(
           `${process.env.NICE_AUTH_REDIRECT_URL}?ok=${ok}&code=${resCode}`
         );
