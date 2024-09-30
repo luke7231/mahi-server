@@ -156,5 +156,11 @@ export const productResolvers = {
   Product: {
     store: async (parent) =>
       await prisma.store.findUnique({ where: { id: parent.storeId } }),
+    menus: async (parent) => {
+      return await prisma.productMenu.findMany({
+        where: { productId: parent.id }, // 해당 product와 연결된 메뉴를 가져옴
+        include: { menu: true }, // 연결된 Menu 객체 포함
+      });
+    },
   },
 };

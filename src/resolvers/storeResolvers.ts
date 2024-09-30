@@ -12,7 +12,15 @@ export const storeResolvers = {
       try {
         const store = await prisma.store.findUnique({
           where: { id: id },
+          include: {
+            products: {
+              include: {
+                menus: true,
+              },
+            },
+          },
         });
+
         if (!store) {
           throw new Error("Store not found");
         }

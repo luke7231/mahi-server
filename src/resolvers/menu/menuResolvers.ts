@@ -78,4 +78,19 @@ export const menuResolvers = {
       });
     },
   },
+  Menu: {
+    // 메뉴의 store 정보를 가져오는 리졸버
+    store: async (parent) => {
+      return await prisma.store.findUnique({
+        where: { id: parent.storeId }, // 메뉴와 연결된 storeId 사용
+      });
+    },
+
+    // 만약 메뉴가 Product와 연관되어 있다면
+    products: async (parent) => {
+      return await prisma.product.findMany({
+        where: { menus: { some: { menuId: parent.id } } }, // 메뉴와 연결된 product를 가져옴
+      });
+    },
+  },
 };

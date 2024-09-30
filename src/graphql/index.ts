@@ -58,7 +58,7 @@ scalar Upload
     img: String
     isSoldout: Boolean
     isEnd: Boolean
-    menus: [MenuQuantity!]
+    menus: [ProductMenu!]
     order: Order
   }
 
@@ -346,5 +346,15 @@ scalar Upload
   type CoordsResponse {
     lng: Float!
     lat: Float! 
+  }
+
+  type ProductMenu {
+    id: Int
+    product: Product
+    productId: Int
+    menu: Menu
+    menuId: Int
+    quantity: Int
+    img: String
   }
 `;
