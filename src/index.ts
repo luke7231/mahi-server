@@ -140,7 +140,7 @@ await server.start().then(async (res) => {
         if (response.data.resultCode === "0000") {
           await prisma.order.update({
             where: { orderId },
-            data: { isApproved: true },
+            data: { isApproved: true, tid },
           });
 
           // 재고 업데이트

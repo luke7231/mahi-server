@@ -232,6 +232,7 @@ scalar Upload
     totalQuantity: Int!
     totalDiscount: Float! 
     isApproved: Boolean
+    isCanceled: Boolean
     user: User
   }
   input CreateOrderInput {
@@ -253,10 +254,16 @@ scalar Upload
     ok: Boolean!
     error: String
   }
+  type MutationResponse {
+    ok: Boolean!
+    error: String
+  }
+  
   type Mutation {
     createOrder(input: CreateOrderInput!): Order!
     updateOrder(input: UpdateOrderInput!): Order!
     deleteOrder(orderId: String!): Order!
+    cancelOrder(id: Int!, reason: String): MutationResponse!
   }
   type Query {
     orders: [Order!]!

@@ -1,4 +1,6 @@
+import axios from "axios";
 import { prisma } from "../../index.js";
+import { sendPushNotification } from "../../lib/expo-token.js";
 
 // TODO: 시크릿키 변경
 const widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
@@ -176,6 +178,88 @@ export const orderResolvers = {
     // 음 에러처리는 클라이언트에서 발생시 처리한다.
     deleteOrder: async (_, { orderId }) => {
       return await prisma.order.delete({ where: { orderId } });
+    },
+    cancelOrder: async (_, { id, reason }) => {
+      try {
+        // Check if the order exists and belongs to the user
+        const order = await prisma.order.findUnique({
+          where: { id },
+        });
+        console.log(order);
+        if (!order) {
+          throw new Error("Order not found");
+        }
+
+        if (order.isCanceled) {
+          return {
+            ok: false,
+            error: "This order has already been canceled.",
+          };
+        }
+
+        const clientKey = process.env.NICE_PAY_CLIENT_KEY;
+        const secretKey = process.env.NICE_PAY_SECRET_KEY;
+
+        // Step 2: Combine clientKey and secretKey with a colon separator
+        const credentials = `${clientKey}:${secretKey}`;
+
+        // Step 3: Base64 encode the combined string
+        const encodedCredentials = Buffer.from(credentials).toString("base64");
+
+        // Make the cancel request to NicePay API using axios
+        const response = await axios.post(
+          `https://api.nicepay.co.kr/v1/payments/${order.tid}/cancel`,
+          {
+            reason: reason,
+            orderId: order.orderId,
+          },
+          {
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+        if (response.data.resultCode === "0000") {
+          // Update the order status in the database
+          await prisma.order.update({
+            where: { id },
+            data: {
+              isCanceled: true,
+            },
+          });
+
+          // push 알람 전송
+          // 로직
+          const customer = await prisma.user.findUnique({
+            where: {
+              id: order.userId,
+            },
+          });
+
+          const pushMessage = "사장님이 주문을 취소하셨어요.";
+          if (customer.push_token) {
+            sendPushNotification([customer.push_token], pushMessage, {});
+          }
+          return {
+            ok: true,
+            error: null,
+          };
+        } else {
+          // Handle the failure of the cancel request
+          return {
+            ok: false,
+            error: response.data.resultMsg,
+          };
+        }
+      } catch (error) {
+        console.error("Error canceling order:", error);
+        return {
+          ok: false,
+          error: error.message || "An error occurred while canceling the order",
+        };
+      }
     },
   },
   Order: {
