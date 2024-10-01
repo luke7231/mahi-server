@@ -142,21 +142,21 @@ model Menu {
   name    String
   price   Float
   img     String?
-  store   Store   @relation(fields: [storeId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId Int
 
   createdAt DateTime      @default(now())
   updatedAt DateTime      @default(now()) @updatedAt
-  products  ProductMenu[] // 중간 테이블과 관계
+  products  ProductMenu[] // 중간 테이블과 관계 
 
   @@map("menu")
 }
 
 model ProductMenu {
   id        Int     @id @default(autoincrement())
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
-  menu      Menu    @relation(fields: [menuId], references: [id])
+  menu      Menu    @relation(fields: [menuId], references: [id], onDelete: Cascade)
   menuId    Int
   quantity  Int // 추가된 수량 정보
   img       String? // 각 메뉴별 이미지 정보 추가
