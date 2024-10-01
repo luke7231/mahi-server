@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import * as qs from "querystring";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { getCoordsFromAddress } from "../../lib/location/index.js";
 dotenv.config();
 
 const KAKAO_UNLINK_URL = "https://kapi.kakao.com/v1/user/unlink";
@@ -17,6 +18,16 @@ interface Context {
 }
 export const userResolvers = {
   Query: {
+    getCoords: async (_, { address }) => {
+      const geoCode = await getCoordsFromAddress({ query: address });
+      const lat = parseFloat(geoCode.addresses[0]?.y) || 0; // 위도
+      const lng = parseFloat(geoCode.addresses[0]?.x) || 0; // 경도
+
+      return {
+        lat,
+        lng,
+      };
+    },
     getLocalAddress: async (_, { lat, lng, push_token }) => {
       const getAddressFromCoords = async ({
         lngInput,
@@ -37,7 +48,6 @@ export const userResolvers = {
           output: "json",
           orders: "roadaddr,legalcode",
         };
-        console.log(lat, lng);
         try {
           const response = await axios.get(url, {
             headers: {
@@ -56,29 +66,8 @@ export const userResolvers = {
       // console.log(res.results[1]);
       // 1.  expo token findUnique
       // 2.  update -> area1,2,3,4
-      // const getCoordsFromAddress = async ({ query }) => {
-      //   const url =
-      //     "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode";
 
-      //   try {
-      //     const response = await axios.get(url, {
-      //       headers: {
-      //         "X-NCP-APIGW-API-KEY-ID": process.env.NAVER_CLIENT_ID,
-      //         "X-NCP-APIGW-API-KEY": process.env.NAVER_CLIENT_SECRET,
-      //       },
-      //       params: {
-      //         query: query,
-      //       },
-      //     });
-      //     return response.data;
-      //   } catch (error) {
-      //     console.error("Error:", error);
-      //     throw error; // 에러 발생 시 에러를 던집니다.
-      //   }
-      // };
       const res = await getAddressFromCoords({ latInput: lat, lngInput: lng });
-      console.log(res);
-      console.log("res.results[0]: ", res.results[0]);
 
       const makeLoadAddr = (data) => {
         // const roadAddr = data.land.name; // 도로명
@@ -96,20 +85,34 @@ export const userResolvers = {
         return `${region}`.trim();
       };
       const loadAddr = makeLoadAddr(res.results[0]);
-      console.log(loadAddr);
 
       if (push_token) {
         const { area1, area2, area3, area4 } = res.results[0].region;
-        const existingExpoToken = await prisma.expo_Token.update({
+
+        const existingExpoToken = await prisma.expo_Token.findUnique({
           where: { token: push_token },
-          data: {
-            area1: area1.name,
-            area2: area2.name,
-            area3: area3.name,
-            area4: area4.name,
-          },
         });
-        console.log(existingExpoToken);
+        if (existingExpoToken) {
+          await prisma.expo_Token.update({
+            where: { token: push_token },
+            data: {
+              area1: area1.name,
+              area2: area2.name,
+              area3: area3.name,
+              area4: area4.name,
+            },
+          });
+        } else {
+          await prisma.expo_Token.create({
+            data: {
+              token: push_token,
+              area1: area1.name,
+              area2: area2.name,
+              area3: area3.name,
+              area4: area4.name,
+            },
+          });
+        }
       }
       // const res2 = await getCoordsFromAddress({
       //   query: "성남시 수정구 복정로 66",
@@ -170,6 +173,7 @@ export const userResolvers = {
           const userInfo = await requestUserInfo(accessToken);
           if (userInfo.id) {
             const kakaoEmail = userInfo.kakao_account.email;
+            const kakaoNickname = userInfo.kakao_account.profile.nickname;
             if (!kakaoEmail) {
               throw new Error(
                 "카카오 내 인증된 이메일이 없으면 사용하실 수 없습니다."
@@ -190,6 +194,7 @@ export const userResolvers = {
                   email: kakaoEmail,
                   kakaoId: userInfo.id,
                   push_token,
+                  name: kakaoNickname,
                 },
               });
               console.log("[kakaoLogin]newUser: ", user);
@@ -217,13 +222,12 @@ export const userResolvers = {
         throw new Error(e);
       }
     },
-    appleLogin: async (_, { id_token, push_token }) => {
+    appleLogin: async (_, { name, id_token, push_token }) => {
       const { sub, email: appleEmail } = (jwt.decode(id_token) ?? {}) as {
         sub: string;
         email: string;
       };
 
-      console.log("sub:", sub);
       if (sub) {
         // 토큰 해독이 잘 됐다면?
         // 유저를 찾는다.
@@ -240,6 +244,7 @@ export const userResolvers = {
               email: appleEmail,
               appleId: sub,
               push_token,
+              name,
             },
           });
           console.log("[appleLogin]newUser: ", user);

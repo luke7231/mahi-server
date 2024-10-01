@@ -1,4 +1,5 @@
 export const typeDefs = `
+scalar Upload
   type Store {
     id: Int!
     lat: Float
@@ -20,10 +21,20 @@ export const typeDefs = `
     stores(lat: Float, lng: Float): [Store]
     justStores: [Store]
     likedStores: [Store!]
+    getSellerStore: Store
   }
 
   type Mutation {
-    createStore(lat: Float, lng: Float, title: String!): CreateStoreResponse
+    createStore(
+      lat: Float, 
+      lng: Float, 
+      title: String!, 
+      address: String, 
+      contactNumber: String, 
+      closingHours: String, 
+      img: Upload
+    ): CreateStoreResponse
+    updateStore(id: Int!, title: String, lat: Float, lng: Float, address: String, contactNumber: String, closingHours: String, img: Upload): Store!
   }
 
   type CreateStoreResponse {
@@ -38,6 +49,7 @@ export const typeDefs = `
     name: String!
     price: Float!
     discountPrice: Float
+    userPrice: Float
     quantity: Int!
     description: String
     saleEndTime: DateTime
@@ -46,11 +58,21 @@ export const typeDefs = `
     img: String
     isSoldout: Boolean
     isEnd: Boolean
+    isDeleted: Boolean
+    menus: [ProductMenu!]
+    order: Order
+  }
+
+  type MenuQuantity {
+    menuId: Int!
+    quantity: Int!
+    img: String
   }
 
   type Query {
     products(storeId: Int!): [Product!]!
     product(id: Int!): Product
+    productsBySeller: [Product!]
   }
 
   type Mutation {
@@ -58,14 +80,23 @@ export const typeDefs = `
     updateProduct(input: UpdateProductInput!): Product!
     deleteProduct(id: Int!): Product!
   }
+  
   input CreateProductInput {
-    storeId: Int!
+    menus: [MenuQuantityInput!]  # 메뉴 ID와 수량을 함께 받는 구조
     name: String!
     price: Float!
     discountPrice: Float
+    userPrice: Float
     quantity: Int!
     description: String
     saleEndTime: DateTime
+    img: Upload
+  }
+  
+  input MenuQuantityInput {
+    menuId: Int!
+    quantity: Int!
+    img: String
   }
 
   input UpdateProductInput {
@@ -100,7 +131,7 @@ export const typeDefs = `
         users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
-    appleLogin(id_token: String!, push_token: String): appleLoginResult!
+    appleLogin(name: String, id_token: String!, push_token: String): appleLoginResult!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
@@ -202,6 +233,8 @@ export const typeDefs = `
     totalQuantity: Int!
     totalDiscount: Float! 
     isApproved: Boolean
+    isCanceled: Boolean
+    user: User
   }
   input CreateOrderInput {
     orderId: String!
@@ -222,10 +255,16 @@ export const typeDefs = `
     ok: Boolean!
     error: String
   }
+  type MutationResponse {
+    ok: Boolean!
+    error: String
+  }
+  
   type Mutation {
     createOrder(input: CreateOrderInput!): Order!
     updateOrder(input: UpdateOrderInput!): Order!
     deleteOrder(orderId: String!): Order!
+    cancelOrder(id: Int!, reason: String): MutationResponse!
   }
   type Query {
     orders: [Order!]!
@@ -244,27 +283,41 @@ export const typeDefs = `
 
   type Seller {
     id: Int!
-    name: String!
-    email: String!
+    name: String
+    email: String
     contactNumber: String
     address: String
     createdAt: DateTime!
     updatedAt: DateTime!
+    push_token: String
     stores: [Store!]
   }
   
   type Query {
-    seller(id: Int!): Seller
+    seller: Seller
     sellers: [Seller!]!
   }
   
   type Mutation {
-    createSeller(name: String!, email: String!, password: String!, contactNumber: String, address: String): Seller!
-    updateSeller(id: Int!, name: String, email: String, contactNumber: String, address: String): Seller!
+    createSeller(password: String!, contactNumber: String!): createSellerResult!
+    updateSeller(name: String, email: String, contactNumber: String, address: String): Seller!
+    updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
     deleteSeller(id: Int!): Seller!
+    sellerLogin(contactNumber: String!, password: String!, push_token: String): sellerLoginResult!
+  }
+  type updateSellerPasswordResult {
+    ok: Boolean!
+    error: String
+  }
+  type sellerLoginResult {
+    token: String
+    error: String
+  }
+  type createSellerResult {
+    seller: Seller!
+    token: String!
   }
   
-
   
   type Menu {
     id: Int!
@@ -282,9 +335,27 @@ export const typeDefs = `
   }
   
   type Mutation {
-    createMenu(storeId: Int!, name: String!, price: Float!, img: String): Menu!
-    updateMenu(id: Int!, name: String, price: Float, img: String): Menu!
+    createMenu(storeId: Int!, name: String!, price: Float!, img: Upload): Menu!
+    updateMenu(id: Int!, name: String, price: Float, img: Upload): Menu!
     deleteMenu(id: Int!): Menu!
   }
   
+  type Query {
+    getCoords(address: String!): CoordsResponse
+  }
+
+  type CoordsResponse {
+    lng: Float!
+    lat: Float! 
+  }
+
+  type ProductMenu {
+    id: Int
+    product: Product
+    productId: Int
+    menu: Menu
+    menuId: Int
+    quantity: Int
+    img: String
+  }
 `;

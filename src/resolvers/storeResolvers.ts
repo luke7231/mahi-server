@@ -1,5 +1,10 @@
 import { Store } from "@prisma/client";
 import { prisma } from "../index.js";
+import {
+  getAddressFromCoords,
+  getCoordsFromAddress,
+} from "../lib/location/index.js";
+import { uploadToS3 } from "../lib/file/index.js";
 
 export const storeResolvers = {
   Query: {
@@ -7,7 +12,15 @@ export const storeResolvers = {
       try {
         const store = await prisma.store.findUnique({
           where: { id: id },
+          include: {
+            products: {
+              include: {
+                menus: true,
+              },
+            },
+          },
         });
+
         if (!store) {
           throw new Error("Store not found");
         }
@@ -106,15 +119,77 @@ export const storeResolvers = {
         };
       });
     },
+    getSellerStore: async (_, __, { seller }) => {
+      try {
+        // 셀러가 로그인되어 있는지 확인
+        if (!seller) {
+          throw new Error("Seller not authenticated");
+        }
+
+        // 셀러가 소유한 스토어 찾기
+        const sellerWithStore = await prisma.seller.findUnique({
+          where: { id: seller.id },
+          include: { store: true }, // 셀러와 연관된 스토어 가져오기
+        });
+        // console.log(sellerWithStore);
+
+        // 스토어가 없을 경우 null 반환
+        if (!sellerWithStore?.store) {
+          return null; // 에러 대신 null을 반환하여 클라이언트에서 처리
+        }
+
+        return sellerWithStore.store;
+      } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch store");
+      }
+    },
   },
   Mutation: {
-    createStore: async (_, { lat, lng, title }) => {
+    createStore: async (
+      _,
+      { title, lat, lng, address, contactNumber, closingHours, img },
+      { seller }
+    ) => {
       try {
+        // 셀러가 로그인되어 있는지 확인
+        if (!seller) {
+          throw new Error("Seller not authenticated");
+        }
+
+        let imageUrl = "";
+        if (img) {
+          imageUrl = await uploadToS3(img, "store-banner"); // S3에 업로드하고 URL을 반환
+        }
+
+        // const
+        const geoCode = await getCoordsFromAddress({ query: address });
+        const guessLat = parseFloat(geoCode.addresses[0]?.y) || 0; // 위도
+        const guessLng = parseFloat(geoCode.addresses[0]?.x) || 0; // 경도
+
+        const res = await getAddressFromCoords({
+          lngInput: guessLng,
+          latInput: guessLat,
+        });
+        const { area1, area2, area3, area4 } = res.results[0].region;
+
+        // 새로운 Store 생성 및 Seller와 연결
         const newStore = await prisma.store.create({
           data: {
-            lat,
-            lng,
+            lat: lat || 0,
+            lng: lng || 0,
             title,
+            address,
+            contactNumber,
+            closingHours,
+            img: imageUrl,
+            Seller: {
+              connect: { id: seller.id }, // Seller와 연결
+            },
+            area1: area1.name,
+            area2: area2.name,
+            area3: area3.name,
+            area4: area4.name,
           },
         });
 
@@ -128,6 +203,75 @@ export const storeResolvers = {
           ok: false,
           error: "Failed to create store",
         };
+      }
+    },
+    updateStore: async (
+      _,
+      { id, title, lat, lng, address, contactNumber, closingHours, img },
+      { seller }
+    ) => {
+      try {
+        // 셀러가 로그인되어 있는지 확인
+        if (!seller) {
+          throw new Error("Seller not authenticated");
+        }
+        // 업데이트할 Store를 확인
+        const existStore = await prisma.store.findUnique({
+          where: { id },
+        });
+
+        if (!existStore) {
+          throw new Error("Store not found");
+        }
+
+        let imageUrl = existStore.img; // 기존 이미지 URL을 기본값으로 설정
+        console.log(img);
+        if (img) {
+          imageUrl = await uploadToS3(img, "store-banner"); // S3에 업로드하고 URL을 반환
+        }
+
+        const geoCode = await getCoordsFromAddress({ query: address });
+        const guessLat = parseFloat(geoCode.addresses[0]?.y) || 0; // 위도
+        const guessLng = parseFloat(geoCode.addresses[0]?.x) || 0; // 경도
+
+        const res = await getAddressFromCoords({
+          lngInput: guessLng,
+          latInput: guessLat,
+        });
+        const { area1, area2, area3, area4 } = res.results[0].region;
+
+        // 셀러가 소유한 스토어인지 확인
+        const store = await prisma.store.findUnique({
+          where: { id },
+          include: { Seller: true },
+        });
+
+        if (!store || store.Seller.some((s) => s.id !== seller.id)) {
+          throw new Error("You do not own this store");
+        }
+
+        // 스토어 정보 업데이트
+        const updatedStore = await prisma.store.update({
+          where: { id },
+          data: {
+            title,
+            lat: lat || 0,
+            lng: lng || 0,
+            address,
+            contactNumber,
+            closingHours,
+            img: imageUrl,
+            area1: area1.name,
+            area2: area2.name,
+            area3: area3.name,
+            area4: area4.name,
+          },
+        });
+
+        return updatedStore;
+      } catch (error) {
+        console.error(error);
+        throw new Error("Failed to update store");
       }
     },
   },

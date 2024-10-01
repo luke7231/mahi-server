@@ -32,21 +32,25 @@ model Store {
 }
 
 model Product {
-  id            Int       @id @default(autoincrement())
-  store         Store     @relation(fields: [storeId], references: [id])
+  id            Int           @id @default(autoincrement())
+  store         Store         @relation(fields: [storeId], references: [id])
   storeId       Int
   name          String
   img           String?
   price         Float
   discountPrice Float?
+  userPrice     Float?
   quantity      Int
   description   String?
   saleEndTime   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  orderIds      Order[]
-  isSoldout     Boolean   @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  isSoldout     Boolean       @default(false)
   isEnd         Boolean?
+  isDeleted     Boolean?
+  menus         ProductMenu[] // 중간 테이블과 관계
+  order         Order?        @relation(fields: [orderId], references: [id]) // 1:N 관계 설정
+  orderId       Int? // nullable로 설정해서 상품이 주문과 연결되지 않은 상태를 표현
 
   @@map("product")
 }
@@ -75,16 +79,18 @@ model User {
 model Order {
   id            Int       @id @default(autoincrement())
   orderId       String    @unique
+  tid           String?
   amount        Float
   coupon        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
-  products      Product[]
   user          User      @relation(fields: [userId], references: [id])
   userId        Int
   totalQuantity Int
   totalDiscount Float
   isApproved    Boolean   @default(false)
+  isCanceled    Boolean   @default(false)
+  products      Product[] // 연결된 상품들(1:N 관계)
 
   @@map("order")
 }
@@ -115,18 +121,20 @@ model Expo_Token {
 
 model Seller {
   id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
+  name          String?
+  email         String?  @unique
   password      String
-  contactNumber String?
+  contactNumber String   @unique
   address       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 
+  push_token String?
+
   store   Store? @relation(fields: [storeId], references: [id])
   storeId Int? // Store와 일대일 관계 설정
 
-   @@map("seller")
+  @@map("seller")
 }
 
 model Menu {
@@ -134,11 +142,24 @@ model Menu {
   name    String
   price   Float
   img     String?
-  store   Store   @relation(fields: [storeId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @default(now()) @updatedAt
+  products  ProductMenu[] // 중간 테이블과 관계 
 
-   @@map("menu")
+  @@map("menu")
+}
+
+model ProductMenu {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  menu      Menu    @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  menuId    Int
+  quantity  Int // 추가된 수량 정보
+  img       String? // 각 메뉴별 이미지 정보 추가
+
+  @@map("productMenu")
 }

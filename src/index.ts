@@ -14,6 +14,8 @@ import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import { AuthResponse } from "./types.js";
 import axios from "axios";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import { sendPushNotification } from "./lib/expo-token.js";
 
 interface MyContext {
   token?: string;
@@ -41,6 +43,8 @@ await server.start().then(async (res) => {
   // const order = await prisma.order.findUnique()
   app.use(bodyParser.json()); // JSON 형식의 본문 파싱
   app.use(bodyParser.urlencoded({ extended: true })); // URL-encoded 형식의 본문 파싱
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
+
   // /nice-auth 엔드포인트 설정
   app.post("/nice-auth", async (req, res) => {
     // throw new Error("그냥 에러요~");
@@ -105,8 +109,8 @@ await server.start().then(async (res) => {
     // ****** 승인 API 호출 시작 ******
     // *********************************
 
-    const clientKey = "S2_7edb63a062cd4f799d14caa983faab78";
-    const secretKey = "08b2d64dad344d1bae91f443d7c981af";
+    const clientKey = process.env.NICE_PAY_CLIENT_KEY;
+    const secretKey = process.env.NICE_PAY_SECRET_KEY;
 
     // Step 2: Combine clientKey and secretKey with a colon separator
     const credentials = `${clientKey}:${secretKey}`;
@@ -115,7 +119,7 @@ await server.start().then(async (res) => {
     const encodedCredentials = Buffer.from(credentials).toString("base64");
 
     // Prepare the URL and headers
-    const url = `https://sandbox-api.nicepay.co.kr/v1/payments/${tid}`;
+    const url = `https://api.nicepay.co.kr/v1/payments/${tid}`;
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Basic ${encodedCredentials}`,
@@ -130,13 +134,16 @@ await server.start().then(async (res) => {
     axios
       .post(url, data, { headers })
       .then(async (response) => {
-        // success
+        // *********************************
+        // ****** 승인 API 호출 시작 ******
+        // *********************************
         if (response.data.resultCode === "0000") {
           await prisma.order.update({
             where: { orderId },
-            data: { isApproved: true },
+            data: { isApproved: true, tid },
           });
 
+          // 재고 업데이트
           cartItems.map(async (cartItem) => {
             const existproduct = await prisma.product.findUnique({
               where: { id: cartItem.product.id },
@@ -152,8 +159,22 @@ await server.start().then(async (res) => {
               },
             });
           });
+
+          // 푸시 알림 전송
+          const storeId = order.products[0].storeId;
+          const store = await prisma.store.findUnique({
+            where: { id: storeId },
+            include: {
+              Seller: true,
+            },
+          });
+          const sellerPushToken = store.Seller[0].push_token;
+          if (sellerPushToken) {
+            const pushMessage = "결제가 발생했습니다💰!!";
+            sendPushNotification([sellerPushToken], pushMessage, {});
+          }
+
           const amount = response.data.amount;
-          console.log("complete");
           res.redirect(
             `${
               process.env.NICE_AUTH_REDIRECT_URL
@@ -168,6 +189,7 @@ await server.start().then(async (res) => {
       .catch((error) => {
         ok = "0";
         resCode = "500";
+        console.log(error);
         res.redirect(
           `${process.env.NICE_AUTH_REDIRECT_URL}?ok=${ok}&code=${resCode}`
         );
@@ -181,24 +203,62 @@ await server.start().then(async (res) => {
 // and our expressMiddleware function.
 app.use(
   "/",
-  cors<cors.CorsRequest>({ origin: "*" }),
+  cors<cors.CorsRequest>({
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    origin: "*",
+  }),
   express.json(),
-  // expressMiddleware accepts the same arguments:
-  // an Apollo Server instance and optional configuration options
   expressMiddleware(server, {
     context: async ({ req }) => {
-      const token = req.headers.authorization || "";
+      const userToken = req.headers["authorization"] || ""; // 유저 토큰
+      const sellerToken = (req.headers["seller-authorization"] as string) || ""; // 셀러 토큰
 
-      if (token) {
+      let user = null;
+      let seller = null;
+
+      // 유저 토큰 검증
+      if (userToken) {
         try {
-          const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-          return { user: decoded }; // 유저 정보를 context에 추가
+          const decodedUser = jwt.verify(
+            userToken.replace("Bearer ", ""),
+            SECRET_KEY
+          );
+
+          user = await prisma.user.findUnique({
+            where: { id: decodedUser.id },
+          });
+
+          if (!user) {
+            throw new Error("User not found");
+          }
         } catch (err) {
-          throw new Error("Invalid/Expired token");
+          throw new Error("Invalid/Expired user token");
         }
       }
 
-      return {};
+      // 셀러 토큰 검증
+      if (sellerToken) {
+        try {
+          const decodedSeller = jwt.verify(
+            sellerToken.replace("Bearer ", ""),
+            SECRET_KEY
+          );
+
+          seller = await prisma.seller.findUnique({
+            where: { id: decodedSeller.id },
+          });
+
+          if (!seller) {
+            throw new Error("Seller not found");
+          }
+        } catch (err) {
+          throw new Error("Invalid/Expired seller token");
+        }
+      }
+
+      // user와 seller 모두 context에 저장
+      return { user, seller };
     },
   })
 );
