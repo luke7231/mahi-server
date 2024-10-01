@@ -58,7 +58,8 @@ export const productResolvers = {
         imageUrl = await uploadToS3(img, "product-banner");
       }
 
-      const userPrice = Math.floor(discountPrice + discountPrice * 0.1);
+      const userPrice =
+        Math.floor((discountPrice + discountPrice * 0.1) / 10) * 10;
 
       const newProduct = await prisma.product.create({
         data: {
