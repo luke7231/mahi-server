@@ -48,7 +48,6 @@ export const userResolvers = {
           output: "json",
           orders: "roadaddr,legalcode",
         };
-        console.log(lat, lng);
         try {
           const response = await axios.get(url, {
             headers: {
@@ -69,8 +68,6 @@ export const userResolvers = {
       // 2.  update -> area1,2,3,4
 
       const res = await getAddressFromCoords({ latInput: lat, lngInput: lng });
-      console.log(res);
-      console.log("res.results[0]: ", res.results[0]);
 
       const makeLoadAddr = (data) => {
         // const roadAddr = data.land.name; // 도로명
@@ -88,20 +85,34 @@ export const userResolvers = {
         return `${region}`.trim();
       };
       const loadAddr = makeLoadAddr(res.results[0]);
-      console.log(loadAddr);
 
       if (push_token) {
         const { area1, area2, area3, area4 } = res.results[0].region;
-        const existingExpoToken = await prisma.expo_Token.update({
+
+        const existingExpoToken = await prisma.expo_Token.findUnique({
           where: { token: push_token },
-          data: {
-            area1: area1.name,
-            area2: area2.name,
-            area3: area3.name,
-            area4: area4.name,
-          },
         });
-        console.log(existingExpoToken);
+        if (existingExpoToken) {
+          await prisma.expo_Token.update({
+            where: { token: push_token },
+            data: {
+              area1: area1.name,
+              area2: area2.name,
+              area3: area3.name,
+              area4: area4.name,
+            },
+          });
+        } else {
+          await prisma.expo_Token.create({
+            data: {
+              token: push_token,
+              area1: area1.name,
+              area2: area2.name,
+              area3: area3.name,
+              area4: area4.name,
+            },
+          });
+        }
       }
       // const res2 = await getCoordsFromAddress({
       //   query: "성남시 수정구 복정로 66",
