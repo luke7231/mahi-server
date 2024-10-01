@@ -47,6 +47,7 @@ model Product {
   updatedAt     DateTime      @default(now()) @updatedAt
   isSoldout     Boolean       @default(false)
   isEnd         Boolean?
+  isDeleted     Boolean?
   menus         ProductMenu[] // 중간 테이블과 관계
   order         Order?        @relation(fields: [orderId], references: [id]) // 1:N 관계 설정
   orderId       Int? // nullable로 설정해서 상품이 주문과 연결되지 않은 상태를 표현

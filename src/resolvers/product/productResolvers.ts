@@ -18,6 +18,7 @@ export const productResolvers = {
       const products = await prisma.product.findMany({
         where: {
           storeId: store.id,
+          OR: [{ isDeleted: false }, { isDeleted: null }],
         },
         include: {
           order: {
@@ -150,7 +151,10 @@ export const productResolvers = {
       });
     },
     deleteProduct: async (_, { id }) => {
-      return await prisma.product.delete({ where: { id } });
+      return await prisma.product.update({
+        where: { id },
+        data: { isDeleted: true },
+      });
     },
   },
   Product: {

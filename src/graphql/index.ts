@@ -58,6 +58,7 @@ scalar Upload
     img: String
     isSoldout: Boolean
     isEnd: Boolean
+    isDeleted: Boolean
     menus: [ProductMenu!]
     order: Order
   }
