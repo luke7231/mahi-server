@@ -14,6 +14,7 @@ scalar Upload
     img: String
     contactNumber: String
     closingHours: String
+    todaysProducts: [Product!]!
   }
 
   type Query {
@@ -73,6 +74,7 @@ scalar Upload
     products(storeId: Int!): [Product!]!
     product(id: Int!): Product
     productsBySeller: [Product!]
+    todaysProducts(storeId: Int!): [Product!]
   }
 
   type Mutation {

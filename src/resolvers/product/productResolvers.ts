@@ -31,6 +31,57 @@ export const productResolvers = {
 
       return products;
     },
+    todaysProducts: async (_, { storeId }) => {
+      // Store 정보를 가져옴
+      const store = await prisma.store.findUnique({
+        where: { id: storeId },
+      });
+
+      // store가 없으면 에러 반환
+      if (!store) {
+        throw new Error("Store not found");
+      }
+
+      // 현재 날짜를 가져옴
+      const today = new Date();
+
+      // store의 closingHour 값을 사용하여 오늘의 마감 시간 (todayEnd)을 설정
+      const [closingHour, closingMinute] = store.closingHours.split(":"); // '21:00' -> ['21', '00']
+
+      const todayEnd = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        parseInt(closingHour, 10), // closingHour의 시 값을 설정
+        parseInt(closingMinute, 10), // closingHour의 분 값을 설정
+        59 // 초는 59로 고정
+      );
+      console.log(todayEnd);
+
+      // 오늘 시작 시간 설정
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0
+      );
+
+      // 해당 storeId의 오늘 생성된 products 찾기
+      const products = await prisma.product.findMany({
+        where: {
+          storeId: store.id,
+          createdAt: {
+            gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
+            lte: todayEnd, // 오늘의 closingHour 이전에 생성된 제품
+          },
+          OR: [{ isDeleted: false }, { isDeleted: null }],
+        },
+      });
+
+      return products;
+    },
   },
   Mutation: {
     // 푸시알람 가즈아
