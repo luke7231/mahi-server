@@ -27,6 +27,7 @@ export const productResolvers = {
             },
           },
         },
+        orderBy: { createdAt: "desc" },
       });
 
       return products;
