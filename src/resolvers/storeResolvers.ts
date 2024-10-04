@@ -284,5 +284,39 @@ export const storeResolvers = {
     },
     products: async (parent) =>
       await prisma.product.findMany({ where: { storeId: parent.id } }),
+    todaysProducts: async (parent) => {
+      const today = new Date();
+
+      // closingHours를 시간으로 변환
+      const [hours, minutes] = parent.closingHours.split(":").map(Number);
+      const todayEnd = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        hours,
+        minutes,
+        0
+      );
+
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0
+      );
+
+      return await prisma.product.findMany({
+        where: {
+          storeId: parent.id,
+          createdAt: {
+            gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
+            lte: todayEnd, // closingHours까지 생성된 제품
+          },
+          OR: [{ isDeleted: false }, { isDeleted: null }],
+        },
+      });
+    },
   },
 };
