@@ -193,16 +193,10 @@ export const storeResolvers = {
           },
         });
 
-        return {
-          ok: true,
-          error: null,
-        };
+        return newStore;
       } catch (error) {
         console.error(error);
-        return {
-          ok: false,
-          error: "Failed to create store",
-        };
+        throw new Error("Failed to update store");
       }
     },
     updateStore: async (
