@@ -15,6 +15,7 @@ scalar Upload
     contactNumber: String
     closingHours: String
     todaysProducts: [Product!]!
+    distance: Float
   }
 
   type Query {
