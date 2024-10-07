@@ -15,6 +15,7 @@ scalar Upload
     contactNumber: String
     closingHours: String
     todaysProducts: [Product!]!
+    distance: Float
   }
 
   type Query {
@@ -34,15 +35,9 @@ scalar Upload
       contactNumber: String, 
       closingHours: String, 
       img: Upload
-    ): CreateStoreResponse
+    ): Store!
     updateStore(id: Int!, title: String, lat: Float, lng: Float, address: String, contactNumber: String, closingHours: String, img: Upload): Store!
   }
-
-  type CreateStoreResponse {
-    ok: Boolean!
-    error: String
-  }
-
     
   type Product {
     id: Int!
