@@ -338,38 +338,45 @@ export const storeResolvers = {
     products: async (parent) =>
       await prisma.product.findMany({ where: { storeId: parent.id } }),
     todaysProducts: async (parent) => {
-      const today = new Date();
+      const now = new Date();
 
       // closingHours를 시간으로 변환
       const [hours, minutes] = parent.closingHours.split(":").map(Number);
-      const todayEnd = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
+      const closingTime = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
         hours,
         minutes,
         0
       );
 
+      // 현재 시간이 closingHours 이후라면 빈 배열 반환
+      if (now > closingTime) {
+        return []; // 시간이 지났으므로 빈 배열 반환
+      } // 근데 이렇게하면,, 그 뒤에 올리는 사람들것도 무조건 안보이겠네.
+
       const todayStart = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
         0,
         0,
         0
       );
 
-      return await prisma.product.findMany({
+      const products = await prisma.product.findMany({
         where: {
           storeId: parent.id,
           createdAt: {
             gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
-            lte: todayEnd, // closingHours까지 생성된 제품
+            lte: closingTime, // closingHours까지 생성된 제품
           },
           OR: [{ isDeleted: false }, { isDeleted: null }],
         },
       });
+
+      return products;
     },
   },
 };
