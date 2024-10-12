@@ -219,5 +219,46 @@ export const productResolvers = {
         include: { menu: true }, // 연결된 Menu 객체 포함
       });
     },
+    isToday: async (parent) => {
+      const today = new Date();
+
+      // 해당 product의 store 정보를 가져옴
+      const store = await prisma.store.findUnique({
+        where: {
+          id: parent.storeId,
+        },
+        select: {
+          closingHours: true,
+        },
+      });
+
+      if (!store || !store.closingHours) {
+        return false; // store가 없거나 closingHours 정보가 없으면 false 리턴
+      }
+
+      // closingHours를 시간으로 변환
+      const [hours, minutes] = store.closingHours.split(":").map(Number);
+      const storeClosingTime = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        hours,
+        minutes,
+        0
+      );
+
+      // 오늘 시작 시간 (00:00:00)
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0
+      );
+
+      // product가 오늘 만들어졌고, store의 closingHours를 지나지 않았는지 확인
+      return parent.createdAt >= todayStart && today <= storeClosingTime;
+    },
   },
 };

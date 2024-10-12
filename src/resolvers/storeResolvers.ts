@@ -74,31 +74,90 @@ export const storeResolvers = {
       // TODO: 필터에 따라 다르게 가야함. (가격순, 거리순, 추천순 등등)
       // ToDO: 페이지 네이션 (무한 스크롤)
       const storesWithDistance = await prisma.$queryRaw`
-      SELECT *
-      FROM (
-          SELECT
-          store.*,
-          (6371 * acos(
-          cos(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
-          cos(${latitude} * 3.141592653589793 / 180.0) *
-          cos((${longitude} * 3.141592653589793 / 180.0) - (CAST(store.lng AS FLOAT) * 3.141592653589793 / 180.0)) +
-          sin(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
-          sin(${latitude} * 3.141592653589793 / 180.0)
-          )) as distance
-          FROM store
-      ) as stores_with_distance
-      WHERE distance <= 5
-      ORDER BY distance ASC;
-`;
+        SELECT *
+  FROM (
+      SELECT
+      store.*,
+      (6371 * acos(
+        cos(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
+        cos(${latitude} * 3.141592653589793 / 180.0) *
+        cos((${longitude} * 3.141592653589793 / 180.0) - (CAST(store.lng AS FLOAT) * 3.141592653589793 / 180.0)) +
+        sin(CAST(store.lat AS FLOAT) * 3.141592653589793 / 180.0) *
+        sin(${latitude} * 3.141592653589793 / 180.0)
+      )) as distance
+      FROM store
+  ) as stores_with_distance
+    WHERE distance <= 5
+    ORDER BY distance ASC;
+  `;
 
-      if (!user) return storesWithDistance;
+      const storeWithProducts = await Promise.all(
+        (storesWithDistance as any).map(async (store) => {
+          const today = new Date();
+
+          // closingHours를 시간으로 변환
+          const [hours, minutes] = store.closingHours.split(":").map(Number);
+          const todayEnd = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            hours,
+            minutes,
+            0
+          );
+
+          const todayStart = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            0,
+            0,
+            0
+          );
+
+          const products = await prisma.product.findMany({
+            where: {
+              storeId: store.id,
+              createdAt: {
+                gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
+                lte: todayEnd, // closingHours까지 생성된 제품
+              },
+              OR: [{ isDeleted: false }, { isDeleted: null }],
+            },
+          });
+          return {
+            ...store,
+            todaysProducts: products,
+          };
+        })
+      );
+      const sortedStores = storeWithProducts
+        // todaysProducts가 있는 가게를 먼저 배치
+        .sort((a, b) => {
+          // todaysProducts가 있는 경우와 없는 경우 우선순위 설정
+          const hasProductsA =
+            a.todaysProducts && a.todaysProducts.length > 0 ? 0 : 1;
+          const hasProductsB =
+            b.todaysProducts && b.todaysProducts.length > 0 ? 0 : 1;
+
+          // 우선순위 1: todaysProducts가 있는 가게 먼저
+          if (hasProductsA !== hasProductsB) {
+            return hasProductsA - hasProductsB;
+          }
+
+          // 우선순위 2: distance가 가까운 가게 먼저
+          return a.distance - b.distance;
+        });
+
+      console.log(sortedStores);
+      if (!user) return sortedStores;
       const likes = await prisma.like.findMany({
         where: { userId: user.id },
       });
       const likeIds = likes.map((like) => like.storeId);
       const set = new Set(likeIds);
 
-      let newArray = (storesWithDistance as Array<Store>).map((item) => {
+      let newArray = (sortedStores as Array<Store>).map((item) => {
         // user.id가 bSet에 포함되어 있으면 user.isLiked를 true로 설정
         return {
           ...item,

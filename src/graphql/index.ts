@@ -57,6 +57,7 @@ scalar Upload
     isDeleted: Boolean
     menus: [ProductMenu!]
     order: Order
+    isToday: Boolean
   }
 
   type MenuQuantity {
