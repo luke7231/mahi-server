@@ -364,43 +364,61 @@ export const storeResolvers = {
     products: async (parent) =>
       await prisma.product.findMany({ where: { storeId: parent.id } }),
     todaysProducts: async (parent) => {
-      const now = new Date();
+      const today = new Date();
 
       // closingHours를 시간으로 변환
       const [hours, minutes] = parent.closingHours.split(":").map(Number);
-      const closingTime = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
+
+      // todayEnd와 todayStart를 UTC로 변환
+      let todayEnd = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
         hours,
         minutes,
         0
       );
 
-      // 현재 시간이 closingHours 이후라면 빈 배열 반환
-      if (now > closingTime) {
-        return []; // 시간이 지났으므로 빈 배열 반환
-      } // 근데 이렇게하면,, 그 뒤에 올리는 사람들것도 무조건 안보이겠네.
-
-      const todayStart = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
+      let todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
         0,
         0,
         0
       );
 
+      // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (timeZone !== "Asia/Seoul" && parent.title == "띠드베이") {
+        todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
+        todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
+      }
+
       const products = await prisma.product.findMany({
         where: {
           storeId: parent.id,
           createdAt: {
-            gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
-            lte: closingTime, // closingHours까지 생성된 제품
+            gte: todayStart, // UTC 기준으로 변환된 오늘 00:00:00 이후 생성된 제품
+            lte: todayEnd, // UTC 기준으로 변환된 closingHours까지 생성된 제품
           },
           OR: [{ isDeleted: false }, { isDeleted: null }],
         },
       });
+      if (parent.title === "띠드베이") {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        console.log("여긴 서브쿼리");
+        console.log(timeZone);
+        console.log("today", today);
+        console.log("todayStart", todayStart);
+        console.log("todayEnd", todayEnd);
+        console.log("product createdAt", products[0]?.createdAt);
+      }
+
+      // 현재 시간이 closingHours 이후라면 빈 배열 반환
+      if (today > todayEnd) {
+        return [];
+      }
 
       return products;
     },
