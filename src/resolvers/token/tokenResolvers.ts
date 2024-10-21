@@ -46,5 +46,26 @@ export const tokenResolvers = {
       }
       return false;
     },
+    setTokenToSeller: async (_, { push_token }, { seller }) => {
+      const existSeller = await prisma.seller.findUnique({
+        where: {
+          id: seller.id,
+        },
+      });
+      if (!existSeller) {
+        return false;
+      }
+
+      await prisma.seller.update({
+        where: {
+          id: seller.id,
+        },
+        data: {
+          push_token,
+        },
+      });
+
+      return true;
+    },
   },
 };
