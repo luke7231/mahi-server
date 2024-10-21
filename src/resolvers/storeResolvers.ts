@@ -97,7 +97,9 @@ export const storeResolvers = {
 
           // closingHours를 시간으로 변환
           const [hours, minutes] = store.closingHours.split(":").map(Number);
-          const todayEnd = new Date(
+
+          // todayEnd와 todayStart를 UTC로 변환
+          let todayEnd = new Date(
             today.getFullYear(),
             today.getMonth(),
             today.getDate(),
@@ -106,7 +108,7 @@ export const storeResolvers = {
             0
           );
 
-          const todayStart = new Date(
+          let todayStart = new Date(
             today.getFullYear(),
             today.getMonth(),
             today.getDate(),
@@ -115,12 +117,19 @@ export const storeResolvers = {
             0
           );
 
+          // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
+          const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (timeZone !== "Asia/Seoul" && store.title == "띠드베이") {
+            todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
+            todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
+          }
+
           const products = await prisma.product.findMany({
             where: {
               storeId: store.id,
               createdAt: {
-                gte: todayStart, // 오늘 00:00:00 이후 생성된 제품
-                lte: todayEnd, // closingHours까지 생성된 제품
+                gte: todayStart, // UTC 기준으로 변환된 오늘 00:00:00 이후 생성된 제품
+                lte: todayEnd, // UTC 기준으로 변환된 closingHours까지 생성된 제품
               },
               OR: [{ isDeleted: false }, { isDeleted: null }],
             },
@@ -133,19 +142,22 @@ export const storeResolvers = {
             console.log("todayEnd", todayEnd);
             console.log("product createdAt", products[0]?.createdAt);
           }
+
           // 현재 시간이 closingHours 이후라면 빈 배열 반환
           if (today > todayEnd) {
             return {
               ...store,
               todaysProducts: [],
-            }; // 시간이 지났으므로 빈 배열 반환
-          } // 근데 이렇게하면,, 그 뒤에 올리는 사람들것도 무조건 안보이겠네.
+            };
+          }
+
           return {
             ...store,
             todaysProducts: products,
           };
         })
       );
+
       const sortedStores = storeWithProducts
         // todaysProducts가 있는 가게를 먼저 배치
         .sort((a, b) => {
