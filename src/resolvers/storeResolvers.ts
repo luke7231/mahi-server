@@ -119,7 +119,7 @@ export const storeResolvers = {
 
           // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
           const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          if (timeZone !== "Asia/Seoul" && store.title == "띠드베이") {
+          if (timeZone !== "Asia/Seoul") {
             todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
             todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
           }
@@ -134,14 +134,6 @@ export const storeResolvers = {
               OR: [{ isDeleted: false }, { isDeleted: null }],
             },
           });
-          if (store.title === "띠드베이") {
-            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            console.log(timeZone);
-            console.log("today", today);
-            console.log("todayStart", todayStart);
-            console.log("todayEnd", todayEnd);
-            console.log("product createdAt", products[0]?.createdAt);
-          }
 
           // 현재 시간이 closingHours 이후라면 빈 배열 반환
           if (today > todayEnd) {
@@ -390,7 +382,7 @@ export const storeResolvers = {
 
       // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (timeZone !== "Asia/Seoul" && parent.title == "띠드베이") {
+      if (timeZone !== "Asia/Seoul") {
         todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
         todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
       }
@@ -405,15 +397,6 @@ export const storeResolvers = {
           OR: [{ isDeleted: false }, { isDeleted: null }],
         },
       });
-      if (parent.title === "띠드베이") {
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        console.log("여긴 서브쿼리");
-        console.log(timeZone);
-        console.log("today", today);
-        console.log("todayStart", todayStart);
-        console.log("todayEnd", todayEnd);
-        console.log("product createdAt", products[0]?.createdAt);
-      }
 
       // 현재 시간이 closingHours 이후라면 빈 배열 반환
       if (today > todayEnd) {
