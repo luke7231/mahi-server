@@ -105,6 +105,13 @@ export const storeResolvers = {
             minutes,
             0
           );
+          // 현재 시간이 closingHours 이후라면 빈 배열 반환
+          if (today > todayEnd) {
+            return {
+              ...store,
+              todaysProducts: [],
+            }; // 시간이 지났으므로 빈 배열 반환
+          } // 근데 이렇게하면,, 그 뒤에 올리는 사람들것도 무조건 안보이겠네.
 
           const todayStart = new Date(
             today.getFullYear(),
