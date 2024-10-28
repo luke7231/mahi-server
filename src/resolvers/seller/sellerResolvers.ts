@@ -98,6 +98,42 @@ export const sellerResolvers = {
 
       return { ok: true, error: null };
     },
+    updateSettlementInfo: async (
+      _,
+      { bank, accountHolder, accountNumber, businessNumber },
+      { seller }
+    ) => {
+      if (!seller) {
+        return { ok: false, error: "Authentication required" };
+      }
+
+      // 현재 유저가 Seller인지 확인
+      const currentSeller = await prisma.seller.findUnique({
+        where: { id: seller.id },
+      });
+
+      if (!currentSeller) {
+        return { ok: false, error: "사장님 계정을 찾을 수 없습니다." };
+      }
+
+      // 정산 정보 업데이트
+      try {
+        await prisma.seller.update({
+          where: { id: seller.id },
+          data: {
+            bank,
+            accountHolder,
+            accountNumber,
+            businessNumber,
+          },
+        });
+
+        return { ok: true, error: null };
+      } catch (error) {
+        console.error("정산 정보 업데이트 중 오류 발생:", error);
+        return { ok: false, error: "정산 정보 업데이트에 실패했습니다." };
+      }
+    },
     deleteSeller: async (_, { id }) => {
       const deletedSeller = await prisma.seller.delete({
         where: { id },
