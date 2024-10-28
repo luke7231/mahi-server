@@ -91,6 +91,7 @@ export const storeResolvers = {
     ORDER BY distance ASC;
   `;
 
+      // 오늘 나온 제품 추가
       const storeWithProducts = await Promise.all(
         (storesWithDistance as any).map(async (store) => {
           const today = new Date();
@@ -117,13 +118,6 @@ export const storeResolvers = {
             0
           );
 
-          // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
-          const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          if (timeZone !== "Asia/Seoul") {
-            todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
-            todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
-          }
-
           const products = await prisma.product.findMany({
             where: {
               storeId: store.id,
@@ -135,14 +129,6 @@ export const storeResolvers = {
             },
           });
 
-          // 현재 시간이 closingHours 이후라면 빈 배열 반환
-          if (today > todayEnd) {
-            return {
-              ...store,
-              todaysProducts: [],
-            };
-          }
-
           return {
             ...store,
             todaysProducts: products,
@@ -150,6 +136,7 @@ export const storeResolvers = {
         })
       );
 
+      // 정렬
       const sortedStores = storeWithProducts
         // todaysProducts가 있는 가게를 먼저 배치
         .sort((a, b) => {
@@ -169,6 +156,8 @@ export const storeResolvers = {
         });
 
       if (!user) return sortedStores;
+
+      // 좋아요
       const likes = await prisma.like.findMany({
         where: { userId: user.id },
       });
@@ -296,7 +285,7 @@ export const storeResolvers = {
         }
 
         let imageUrl = existStore.img; // 기존 이미지 URL을 기본값으로 설정
-        console.log(img);
+
         if (img) {
           imageUrl = await uploadToS3(img, "store-banner"); // S3에 업로드하고 URL을 반환
         }

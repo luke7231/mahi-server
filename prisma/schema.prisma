@@ -134,6 +134,11 @@ model Seller {
   store   Store? @relation(fields: [storeId], references: [id])
   storeId Int? // Store와 일대일 관계 설정
 
+  bank           String?
+  accountHolder  String?
+  accountNumber  String?
+  businessNumber String?
+
   @@map("seller")
 }
 

@@ -290,6 +290,11 @@ scalar Upload
     updatedAt: DateTime!
     push_token: String
     stores: [Store!]
+    bank: String
+    accountHolder: String
+    accountNumber: String
+    businessNumber: String
+
   }
   
   type Query {
@@ -301,10 +306,21 @@ scalar Upload
     createSeller(password: String!, contactNumber: String!): createSellerResult!
     updateSeller(name: String, email: String, contactNumber: String, address: String): Seller!
     updateSellerPassword(oldPassword: String!, newPassword: String!): updateSellerPasswordResult!
+    updateSettlementInfo(
+      bank: String
+      accountHolder: String
+      accountNumber: String
+      businessNumber: String
+    ): updateSettlementInfoResult!
+  
     deleteSeller(id: Int!): Seller!
     sellerLogin(contactNumber: String!, password: String!, push_token: String): sellerLoginResult!
   }
   type updateSellerPasswordResult {
+    ok: Boolean!
+    error: String
+  }
+  type updateSettlementInfoResult {
     ok: Boolean!
     error: String
   }
