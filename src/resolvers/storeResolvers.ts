@@ -118,13 +118,6 @@ export const storeResolvers = {
             0
           );
 
-          // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
-          const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          if (timeZone !== "Asia/Seoul") {
-            todayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
-            todayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
-          }
-
           const products = await prisma.product.findMany({
             where: {
               storeId: store.id,
