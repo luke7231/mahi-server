@@ -117,8 +117,6 @@ export const storeResolvers = {
             0,
             0
           );
-          console.log(todayStart);
-          console.log(todayEnd);
 
           // 만약 서버가 UTC 시간대를 사용 중이라면 9시간을 빼서 UTC로 변환
           const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -137,7 +135,7 @@ export const storeResolvers = {
               OR: [{ isDeleted: false }, { isDeleted: null }],
             },
           });
-          console.log(products);
+
           return {
             ...store,
             todaysProducts: products,
@@ -294,7 +292,7 @@ export const storeResolvers = {
         }
 
         let imageUrl = existStore.img; // 기존 이미지 URL을 기본값으로 설정
-        console.log(img);
+
         if (img) {
           imageUrl = await uploadToS3(img, "store-banner"); // S3에 업로드하고 URL을 반환
         }
