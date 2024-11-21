@@ -154,10 +154,6 @@ export const productResolvers = {
         const message = `${store.title}🍳에서 새로운 팩이 나왔어요!🎉`;
         const data = { storeId: store.id };
 
-        // (최종 발송)
-        if (likedUserTokens.length !== 0) {
-          sendPushNotification(likedUserTokens, message, data);
-        }
         const 동주민 = await prisma.expo_Token.findMany({
           where: {
             area1: store.area1,
@@ -170,8 +166,29 @@ export const productResolvers = {
         const tokens = 동주민.map((주민) => 주민.token);
         const message2 = `${store.area3}에 새로운 재고가 올라왔어요!🎉`;
         const data2 = { storeId: store.id };
-        if (tokens.length !== 0) {
-          sendPushNotification(tokens, message2, data2);
+
+        const products = await prisma.product.findMany({
+          where: {
+            storeId: store.id,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+        const recentProduct = products[1];
+
+        // 현재 시간과 recentProduct의 생성 시간을 비교
+        if (recentProduct) {
+          const now = new Date();
+          const productCreatedAt = new Date(recentProduct.createdAt);
+          const timeDifferenceInMinutes =
+            (now.getTime() - productCreatedAt.getTime()) / 1000 / 60;
+
+          // 1분 이상 차이가 나야 푸시 알림을 발송
+          if (likedUserTokens.length !== 0 && timeDifferenceInMinutes > 1) {
+            sendPushNotification(likedUserTokens, message, data);
+          }
+          if (tokens.length !== 0 && timeDifferenceInMinutes > 1) {
+            sendPushNotification(tokens, message2, data2);
+          }
         }
       }
 
