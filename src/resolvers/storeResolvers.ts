@@ -210,6 +210,67 @@ export const storeResolvers = {
         throw new Error("Failed to fetch store");
       }
     },
+    getSellerReport: async (_, __, { seller }) => {
+      if (!seller) {
+        throw new Error("Seller not authenticated");
+      }
+      const sellerWithStore = await prisma.seller.findUnique({
+        where: { id: seller.id },
+        include: { store: true }, // 셀러와 연관된 스토어 가져오기
+      });
+      if (!sellerWithStore?.store) {
+        return null; // 에러 대신 null을 반환하여 클라이언트에서 처리
+      }
+
+      type Result = {
+        storeId: number;
+        storeTitle: string;
+        orderCount: number;
+        totalSales: number;
+      };
+
+      const result: Result[] = await prisma.$queryRaw`
+          SELECT
+            store.id AS storeId,
+            store.title AS storeTitle,
+            COUNT(\`order\`.id) AS orderCount,
+            SUM(product.discountPrice) AS totalSales
+          FROM
+            \`order\`
+          INNER JOIN product ON product.orderId = \`order\`.id
+          INNER JOIN store ON store.id = product.storeId
+          WHERE 
+            \`order\`.isApproved = 1
+            AND \`order\`.isCanceled = 0
+            AND store.id = ${sellerWithStore.storeId}
+          GROUP BY
+            store.id
+`;
+
+      if (result.length === 0) return null;
+
+      const likeCount = await prisma.like.count({
+        where: {
+          storeId: sellerWithStore.storeId,
+        },
+      });
+      function calculateCarbonEmission(amount: number) {
+        // 입력된 금액을 1,000원 단위로 올림
+        const roundedAmount = Math.ceil(amount / 1000) * 1000;
+
+        // 1,000원당 0.25kg을 곱해서 탄소 배출량 계산
+        const carbonEmission = (roundedAmount / 1000) * 0.25;
+
+        return carbonEmission;
+      }
+      const totalCarbonEmission = calculateCarbonEmission(result[0].totalSales);
+      return {
+        totalCustomerCount: Number(result[0].orderCount),
+        totalDiscountPrice: result[0].totalSales,
+        totalLikeCount: likeCount,
+        totalCarbonEmission,
+      };
+    },
   },
   Mutation: {
     createStore: async (

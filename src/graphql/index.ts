@@ -24,6 +24,14 @@ scalar Upload
     justStores: [Store]
     likedStores: [Store!]
     getSellerStore: Store
+    getSellerReport: SellerReport
+  }
+
+  type SellerReport {
+    totalCustomerCount: Int
+    totalDiscountPrice: Int
+    totalLikeCount: Int
+    totalCarbonEmission: Float
   }
 
   type Mutation {
@@ -126,7 +134,7 @@ scalar Upload
 
   type Query {
     getLocalAddress(lat: Float!, lng: Float!, push_token: String): String!
-        users: [User!]!
+    users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
     appleLogin(name: String, id_token: String!, push_token: String): appleLoginResult!
