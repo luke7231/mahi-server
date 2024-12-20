@@ -1,4 +1,5 @@
 import { prisma } from "../../index.js";
+import { isCreatedToday } from "../../lib/date/index.js";
 import { sendPushNotification } from "../../lib/expo-token.js";
 import { uploadToS3 } from "../../lib/file/index.js";
 
@@ -264,18 +265,8 @@ export const productResolvers = {
         0
       );
 
-      // 오늘 시작 시간 (00:00:00)
-      const todayStart = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        0,
-        0,
-        0
-      );
-
       // product가 오늘 만들어졌고, store의 closingHours를 지나지 않았는지 확인
-      return parent.createdAt >= todayStart && today <= storeClosingTime;
+      return isCreatedToday(parent.createdAt) && today <= storeClosingTime;
     },
   },
 };
