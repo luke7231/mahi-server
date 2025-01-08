@@ -144,7 +144,7 @@ await server.start().then(async (res) => {
           });
 
           // 재고 업데이트
-          cartItems.map(async (cartItem) => {
+          await cartItems.map(async (cartItem) => {
             const existproduct = await prisma.product.findUnique({
               where: { id: cartItem.product.id },
             });
@@ -156,29 +156,16 @@ await server.start().then(async (res) => {
               data: {
                 quantity: left,
                 isSoldout,
+                order: { connect: { id: order.id } },
               },
             });
           });
-
-          // 푸시 알림 전송
-          const storeId = order.products[0].storeId;
-          const store = await prisma.store.findUnique({
-            where: { id: storeId },
-            include: {
-              Seller: true,
-            },
-          });
-          const sellerPushToken = store.Seller[0].push_token;
-          if (sellerPushToken) {
-            const pushMessage = "결제가 발생했습니다💰!!";
-            sendPushNotification([sellerPushToken], pushMessage, {});
-          }
 
           const amount = response.data.amount;
           res.redirect(
             `${
               process.env.NICE_AUTH_REDIRECT_URL
-            }?ok=${1}&code=${200}&amount=${amount}`
+            }?ok=${1}&code=${200}&amount=${amount}&orderId=${order.id}`
           );
           return;
         } else {

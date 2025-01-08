@@ -277,6 +277,7 @@ scalar Upload
     orders: [Order!]!
     order(id: Int!): Order
     compareOrderAmount(orderId: String!, amount: Float!, paymentKey: String!, cartItems: [CartItem]): CompareOrderAmountResult! 
+    sendOrderCompletionNotification(orderId: String): MutationResponse! 
   }
   input CartItem {
     product: ProductInput

@@ -131,6 +131,59 @@ export const orderResolvers = {
       // return order.amount === amount;
       return await confirmPayment();
     },
+    sendOrderCompletionNotification: async (_, { orderId }) => {
+      try {
+        // 주문 조회
+        const order = await prisma.order.findUnique({
+          where: { id: Number(orderId) },
+          include: {
+            products: true, // 주문에 연결된 상품
+          },
+        });
+
+        if (!order) {
+          throw new Error("Order not found");
+        }
+
+        // 첫 번째 상품의 storeId를 사용하여 스토어 조회
+        const storeId = order.products[0].storeId;
+        const store = await prisma.store.findUnique({
+          where: { id: storeId },
+          include: {
+            Seller: true, // 스토어의 판매자 정보
+          },
+        });
+
+        if (!store || !store.Seller || store.Seller.length === 0) {
+          throw new Error("Seller information not found for the store");
+        }
+
+        // 판매자의 푸시 토큰 조회
+        const sellerPushToken = store.Seller[0].push_token;
+        if (!sellerPushToken) {
+          return {
+            ok: false,
+            error: "Seller does not have a push token registered.",
+          };
+        }
+
+        // 푸시 알림 메시지 전송
+        const pushMessage = "결제가 발생했습니다💰!!";
+        await sendPushNotification([sellerPushToken], pushMessage, {});
+
+        return {
+          ok: true,
+          error: null,
+        };
+      } catch (error) {
+        console.error("Error sending order completion notification:", error);
+        return {
+          ok: false,
+          error:
+            error.message || "An error occurred while sending the notification",
+        };
+      }
+    },
   },
   Mutation: {
     createOrder: async (
@@ -155,9 +208,6 @@ export const orderResolvers = {
           totalQuantity,
           totalDiscount,
           coupon,
-          products: {
-            connect: productIds.map((id) => ({ id })),
-          },
         },
         include: { products: true },
       });
