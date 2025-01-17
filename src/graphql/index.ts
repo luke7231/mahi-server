@@ -25,6 +25,16 @@ scalar Upload
     likedStores: [Store!]
     getSellerStore: Store
     getSellerReport: SellerReport
+    getLocalAddress(lat: Float!, lng: Float!, push_token: String): String!
+    getLocalAddressV2(lat: Float!, lng: Float!, push_token: String): LocalAddressResult!
+  }
+
+  type LocalAddressResult {
+    loadAddr: String!
+    area1: String
+    area2: String
+    area3: String
+    area4: String
   }
 
   type SellerReport {
@@ -133,7 +143,6 @@ scalar Upload
   }
 
   type Query {
-    getLocalAddress(lat: Float!, lng: Float!, push_token: String): String!
     users: [User!]!
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
