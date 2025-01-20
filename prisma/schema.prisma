@@ -173,6 +173,7 @@ model ProductMenu {
 model UncontractedStore {
   id           Int      @id @default(autoincrement())
   name         String
+  category     String   @default("")
   img          String?  @db.VarChar(500)
   mainMenuImg1 String?  @db.VarChar(500)
   mainMenuImg2 String?  @db.VarChar(500)

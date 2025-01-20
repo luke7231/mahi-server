@@ -220,19 +220,7 @@ scalar Upload
     likeStore(storeId: Int!): Like!
     cancelLike(storeId: Int!): Like!
   }
-
-  type UncontractedStore {
-    id: Int!
-    name: String!
-    img: String
-    mainMenuImg1: String
-    mainMenuImg2: String
-    priceRange: String
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    votes: [Vote!]!
-  }
-  
+ 
   type Query {
     getAllVotes: [Vote!]!
     getUserVotes(userId: Int!): [Vote!]!
@@ -255,6 +243,7 @@ scalar Upload
   type UncontractedStore {
     id: Int!
     name: String!
+    category: String!
     img: String
     mainMenuImg1: String
     mainMenuImg2: String
@@ -267,7 +256,7 @@ scalar Upload
   }
 
   type Query {
-    getUncontractedStores(page: Int): [UncontractedStore!]!
+    getUncontractedStores(category: String!): [UncontractedStore!]!
     getUncontractedStore(id: Int!): UncontractedStore
   }
   scalar DateTime

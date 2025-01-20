@@ -2,12 +2,15 @@ import { prisma } from "../../index.js";
 
 export const uncontractedStoreResolvers = {
   Query: {
-    getUncontractedStores: async (_, __, { user }) => {
+    getUncontractedStores: async (_, { category }, { user }) => {
       if (!user) {
         throw new Error("User must be authenticated");
       }
 
       const stores = await prisma.uncontractedStore.findMany({
+        where: {
+          category: category,
+        },
         include: {
           votes: true,
         },
