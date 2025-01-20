@@ -6,7 +6,9 @@ import { productResolvers } from "./product/productResolvers.js";
 import { orderResolvers } from "./order/orderResolvers.js";
 import { sellerResolvers } from "./seller/sellerResolvers.js";
 import { menuResolvers } from "./menu/menuResolvers.js";
+import { voteResolvers } from "./vote/voteResolver.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
+import { uncontractedStoreResolvers } from "./uncontractedStore/uncontractedStoreResolvers.js";
 
 export const resolvers = {
   Upload: GraphQLUpload, // Upload 타입 정의
@@ -17,6 +19,8 @@ export const resolvers = {
     ...orderResolvers.Query,
     ...sellerResolvers.Query,
     ...menuResolvers.Query,
+    ...voteResolvers.Query,
+    ...uncontractedStoreResolvers.Query,
   },
   Mutation: {
     ...storeResolvers.Mutation,
@@ -27,6 +31,7 @@ export const resolvers = {
     ...orderResolvers.Mutation,
     ...sellerResolvers.Mutation,
     ...menuResolvers.Mutation,
+    ...voteResolvers.Mutation,
   },
   User: userResolvers.User,
   Store: storeResolvers.Store,

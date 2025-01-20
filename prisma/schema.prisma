@@ -67,6 +67,7 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
   likes       Like[]
+  votes       Vote[]
   push_token  String?
   kakaoId     BigInt?
   appleId     String?
@@ -167,4 +168,32 @@ model ProductMenu {
   img       String? // 각 메뉴별 이미지 정보 추가
 
   @@map("productMenu")
+}
+
+model UncontractedStore {
+  id           Int      @id @default(autoincrement())
+  name         String
+  img          String?  @db.VarChar(500)
+  mainMenuImg1 String?  @db.VarChar(500)
+  mainMenuImg2 String?  @db.VarChar(500)
+  priceRange   String?  @db.VarChar(50)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  votes        Vote[] // 투표와의 관계 설정
+
+  @@map("uncontracted_store")
+}
+
+
+model Vote {
+  id                  Int               @id @default(autoincrement())
+  userId              Int
+  uncontractedStoreId Int
+  createdAt           DateTime          @default(now())
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uncontractedStore   UncontractedStore @relation(fields: [uncontractedStoreId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, uncontractedStoreId])
+  @@index([uncontractedStoreId], map: "Vote_uncontractedStoreId_fkey")
+  @@map("vote")
 }

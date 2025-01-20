@@ -221,6 +221,55 @@ scalar Upload
     cancelLike(storeId: Int!): Like!
   }
 
+  type UncontractedStore {
+    id: Int!
+    name: String!
+    img: String
+    mainMenuImg1: String
+    mainMenuImg2: String
+    priceRange: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    votes: [Vote!]!
+  }
+  
+  type Query {
+    getAllVotes: [Vote!]!
+    getUserVotes(userId: Int!): [Vote!]!
+  }
+
+  type Mutation {
+    voteForStores(uncontractedStoreIds: [Int!]!): [Vote!]!
+    cancelVote(uncontractedStoreId: Int!): Vote!
+  }
+
+  type Vote {
+    id: Int!
+    userId: Int!
+    uncontractedStoreId: Int!
+    user: User
+    uncontractedStore: UncontractedStore
+    createdAt: DateTime!
+  } 
+
+  type UncontractedStore {
+    id: Int!
+    name: String!
+    img: String
+    mainMenuImg1: String
+    mainMenuImg2: String
+    priceRange: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    votes: [Vote!]!
+    voteCount: Int!
+    isVoted: Boolean
+  }
+
+  type Query {
+    getUncontractedStores(page: Int): [UncontractedStore!]!
+    getUncontractedStore(id: Int!): UncontractedStore
+  }
   scalar DateTime
 
   type Token {
