@@ -3,10 +3,6 @@ import { prisma } from "../../index.js";
 export const uncontractedStoreResolvers = {
   Query: {
     getUncontractedStores: async (_, { category }, { user }) => {
-      if (!user) {
-        throw new Error("User must be authenticated");
-      }
-
       const stores = await prisma.uncontractedStore.findMany({
         where: {
           category: category,
@@ -15,6 +11,15 @@ export const uncontractedStoreResolvers = {
           votes: true,
         },
       });
+
+      const storesWithVoteCount = stores.map((store) => ({
+        ...store,
+        voteCount: store.votes.length,
+      }));
+
+      if (!user) {
+        return storesWithVoteCount.sort((a, b) => b.voteCount - a.voteCount);
+      }
 
       const userVotes = await prisma.vote.findMany({
         where: { userId: user.id },
