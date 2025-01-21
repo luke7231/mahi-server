@@ -198,3 +198,13 @@ model Vote {
   @@index([uncontractedStoreId], map: "Vote_uncontractedStoreId_fkey")
   @@map("vote")
 }
+
+model AuthNumber {
+  id          Int      @id @default(autoincrement())
+  phoneNumber String   @unique
+  authNumber  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@map("auth_number")
+}
