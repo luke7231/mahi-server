@@ -429,4 +429,13 @@ scalar Upload
     quantity: Int
     img: String
   }
+    type Mutation {
+      sendAuthNumber(phoneNumber: String!): AuthResponse!
+      verifyAuthNumber(phoneNumber: String!, authNumber: String!): AuthResponse!
+    }
+
+    type AuthResponse {
+      ok: Boolean!
+      error: String
+    }
 `;

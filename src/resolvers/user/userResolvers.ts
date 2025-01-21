@@ -6,6 +6,10 @@ import * as qs from "querystring";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { getCoordsFromAddress } from "../../lib/location/index.js";
+import pkg from "solapi";
+import { error } from "console";
+const { SolapiMessageService } = pkg;
+
 dotenv.config();
 
 const KAKAO_UNLINK_URL = "https://kapi.kakao.com/v1/user/unlink";
@@ -685,6 +689,67 @@ export const userResolvers = {
       } catch (e) {
         return { ok: false, error: e };
       }
+    },
+    sendAuthNumber: async (_, { phoneNumber }) => {
+      const messageService = new SolapiMessageService(
+        process.env.SOLAPI_API_KEY,
+        process.env.SOLAPI_API_SECRET
+      );
+
+      // 이미 존재하는 번호인지 확인
+      const existingUser = await prisma.user.findUnique({
+        where: { phone: phoneNumber },
+      });
+
+      if (existingUser) {
+        return { ok: false, error: "이미 해당 번호로 가입된 계정이 있습니다." };
+      }
+
+      // 인증번호 생성
+      const authNumber = Math.floor(100000 + Math.random() * 900000).toString();
+      // 인증번호를 데이터베이스에 저장
+      await prisma.authNumber.create({
+        data: {
+          phoneNumber,
+          authNumber,
+        },
+      });
+
+      // 인증번호를 포함한 메시지 발송
+      await messageService.send({
+        to: phoneNumber,
+        from: process.env.SOLAPI_SENDER_PHONE_NUMBER,
+        text: `인증번호는 ${authNumber} 입니다.`,
+      });
+
+      return { ok: true, error: null };
+    },
+    verifyAuthNumber: async (_, { phoneNumber, authNumber }, { user }) => {
+      // 데이터베이스에서 인증번호 조회
+      const storedAuthNumber = await prisma.authNumber.findUnique({
+        where: { phoneNumber },
+      });
+
+      if (!storedAuthNumber) {
+        return { ok: false, error: "인증번호가 존재하지 않습니다." };
+      }
+
+      if (storedAuthNumber.authNumber !== authNumber) {
+        return { ok: false, error: "인증번호가 일치하지 않습니다." };
+      }
+
+      // 인증번호가 일치하면 유저의 전화번호 업데이트
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { phone: phoneNumber },
+      });
+
+      // 인증번호 삭제
+      await prisma.authNumber.delete({
+        where: { phoneNumber },
+      });
+
+      return { ok: true, error: null };
     },
   },
   User: {
