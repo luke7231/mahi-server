@@ -1,6 +1,7 @@
 import axios from "axios";
 import { prisma } from "../../index.js";
 import { sendPushNotification } from "../../lib/expo-token.js";
+import { sendPaymentCompletionAlimTalkToSeller } from "../../lib/sms.js";
 
 // TODO: 시크릿키 변경
 const widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
@@ -138,6 +139,7 @@ export const orderResolvers = {
           where: { id: Number(orderId) },
           include: {
             products: true, // 주문에 연결된 상품
+            user: true,
           },
         });
 
@@ -170,6 +172,15 @@ export const orderResolvers = {
         // 푸시 알림 메시지 전송
         const pushMessage = "결제가 발생했습니다💰!!";
         await sendPushNotification([sellerPushToken], pushMessage, {});
+
+        const sellerPhoneNumber = store.Seller[0].contactNumber;
+        await sendPaymentCompletionAlimTalkToSeller({
+          sellerPhoneNumber,
+          productName: order.products[0].name,
+          customerName: order.user.name,
+          customerContact: order.user?.phone,
+          pickUpTime: order.pickUpTime,
+        });
 
         return {
           ok: true,
