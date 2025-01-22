@@ -375,6 +375,12 @@ export const userResolvers = {
       });
       return user;
     },
+    me: async (_, __, { user }) => {
+      const foundUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+      return foundUser;
+    },
   },
   Mutation: {
     createUser: async (_, { data }) => {

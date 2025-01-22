@@ -147,6 +147,7 @@ scalar Upload
     user(id: Int!): User!
     kakaoLogin(code: String!, client_id: String!, redirect_url: String!, push_token: String): kakaoLoginResult!
     appleLogin(name: String, id_token: String!, push_token: String): appleLoginResult!
+    me: User!
   }
   type Mutation {
     createUser(data: CreateUserInput!): User!
