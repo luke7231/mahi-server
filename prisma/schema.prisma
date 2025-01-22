@@ -92,6 +92,7 @@ model Order {
   isApproved    Boolean   @default(false)
   isCanceled    Boolean   @default(false)
   products      Product[] // 연결된 상품들(1:N 관계)
+  pickUpTime    String?
 
   @@map("order")
 }

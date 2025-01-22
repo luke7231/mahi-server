@@ -196,6 +196,7 @@ export const orderResolvers = {
           productIds,
           totalQuantity,
           totalDiscount,
+          pickUpTime,
         },
       },
       { user }
@@ -208,6 +209,7 @@ export const orderResolvers = {
           totalQuantity,
           totalDiscount,
           coupon,
+          pickUpTime,
         },
         include: { products: true },
       });

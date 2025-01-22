@@ -290,6 +290,7 @@ scalar Upload
     isApproved: Boolean
     isCanceled: Boolean
     user: User
+    pickUpTime: String
   }
   input CreateOrderInput {
     orderId: String!
@@ -298,6 +299,7 @@ scalar Upload
     totalDiscount: Float!
     coupon: String
     productIds: [Int!]!  # Product IDs 리스트를 입력받음
+    pickUpTime: String
   }
   input UpdateOrderInput {
     id: Int!
