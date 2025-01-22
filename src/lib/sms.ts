@@ -28,6 +28,11 @@ export async function sendAlimTalk(
   templateCode: string,
   variables: Record<string, string>
 ) {
+  if (!to.startsWith("010")) {
+    console.error("Error: The recipient's phone number must start with 010.");
+    return;
+  }
+
   try {
     const response = await messageService.send({
       from: process.env.SOLAPI_SENDER_PHONE_NUMBER as string,
@@ -38,7 +43,6 @@ export async function sendAlimTalk(
         variables, // 템플릿 변수
       },
     });
-    console.log("AlimTalk sent successfully:", response);
   } catch (error) {
     console.error("Error sending AlimTalk:", error);
   }
